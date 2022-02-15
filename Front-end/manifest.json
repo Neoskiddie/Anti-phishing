@@ -1,0 +1,20 @@
+{
+  "name": "Anti-phishing extension",
+  "description": "Anti-phishing extension developed as part of an honours project",
+  "author": "Grzegorz Bronka",
+  "version": "1.0",
+  "manifest_version": 2,
+  "options_page": "options.html",
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "http://*/*",
+    "https://*/*"
+    ],
+    "web_accessible_resources": [
+    "html/warning.html"
+  ],
+   "background": {
+    "scripts": ["js/background.js"]
+  }
+}
