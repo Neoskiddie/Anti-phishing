@@ -31,10 +31,39 @@ class UrlFeautures():
         self.feautures = self.extractFeautures()
 
     def has_ip(self, url):
-        match = re.search('(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\/)|'  # IPv4
-                          # IPv4 in hexadecimal
-                          '((0x[0-9a-fA-F]{1,2})\\.(0x[0-9a-fA-F]{1,2})\\.(0x[0-9a-fA-F]{1,2})\\.(0x[0-9a-fA-F]{1,2})\\/)'
-                          '(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}', url)  # Ipv6
+        '''
+        Code from https://gist.github.com/dfee/6ed3a4b05cfe7a6faf40a2102408d5d8
+        slightly modified to detect IPv4 on it's own. Because it's enough to detect IPv4 on it's own, the embeded cases were deleted, as they are detected anyway.
+        https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
+        '''
+        IPV4SEG = r'(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
+        IPV4ADDR = r'(?:(?:' + IPV4SEG + r'\.){3,3}' + IPV4SEG + r')'
+        IPV6SEG = r'(?:(?:[0-9a-fA-F]){1,4})'
+        IPV6GROUPS = (
+            r'(?:' + IPV6SEG + r':){7,7}' + IPV6SEG,
+            # 1::                                 1:2:3:4:5:6:7::
+            r'(?:' + IPV6SEG + r':){1,7}:',
+            # 1::8               1:2:3:4:5:6::8   1:2:3:4:5:6::8
+            r'(?:' + IPV6SEG + r':){1,6}:' + IPV6SEG,
+            # 1::7:8             1:2:3:4:5::7:8   1:2:3:4:5::8
+            r'(?:' + IPV6SEG + r':){1,5}(?::' + IPV6SEG + r'){1,2}',
+            # 1::6:7:8           1:2:3:4::6:7:8   1:2:3:4::8
+            r'(?:' + IPV6SEG + r':){1,4}(?::' + IPV6SEG + r'){1,3}',
+            # 1::5:6:7:8         1:2:3::5:6:7:8   1:2:3::8
+            r'(?:' + IPV6SEG + r':){1,3}(?::' + IPV6SEG + r'){1,4}',
+            # 1::4:5:6:7:8       1:2::4:5:6:7:8   1:2::8
+            r'(?:' + IPV6SEG + r':){1,2}(?::' + IPV6SEG + r'){1,5}',
+            # 1::3:4:5:6:7:8     1::3:4:5:6:7:8   1::8
+            IPV6SEG + r':(?:(?::' + IPV6SEG + r'){1,6})',
+            # ::2:3:4:5:6:7:8    ::2:3:4:5:6:7:8  ::8       ::
+            r':(?:(?::' + IPV6SEG + r'){1,7}|:)',
+            # fe80::7:8%eth0     fe80::7:8%1  (link-local IPv6 addresses with zone index)
+            r'fe80:(?::' + IPV6SEG + r'){0,4}%[0-9a-zA-Z]{1,}',
+            IPV4ADDR
+        )
+        # Reverse rows for greedy match
+        IPV6ADDR = '|'.join(['(?:{})'.format(g) for g in IPV6GROUPS[::-1]])
+        match = re.search(IPV6ADDR, url)  # Ipv6
         if match:
             return 1
         else:

@@ -8,10 +8,73 @@ class TestFeautureExtraction(unittest.TestCase):
         self.feautureExtraction = UrlFeautures(self.URL)
 
     def test_has_ip(self):
+        ipList = ['1::',
+                  '1:2:3:4:5:6:7::',
+                  '1::8',
+                  '1:2:3:4:5:6::8',
+                  '1:2:3:4:5:6::8',
+                  '1::7:8',
+                  '1:2:3:4:5::7:8',
+                  '1:2:3:4:5::8',
+                  '1::6:7:8',
+                  '1:2:3:4::6:7:8',
+                  '1:2:3:4::8',
+                  '1::5:6:7:8',
+                  '1:2:3::5:6:7:8',
+                  '1:2:3::8',
+                  '1::4:5:6:7:8',
+                  '1:2::4:5:6:7:8',
+                  '1:2::8',
+                  '1::3:4:5:6:7:8',
+                  '1::3:4:5:6:7:8',
+                  '1::8',
+                  '::2:3:4:5:6:7:8',
+                  '::2:3:4:5:6:7:8',
+                  '::8',
+                  '::',
+                  'fe80::7:8%eth0',
+                  'fe80::7:8%1',
+                  '::255.255.255.255',
+                  '::ffff:255.255.255.255',
+                  '::ffff:0:255.255.255.255',
+                  '2001:db8:3:4::192.0.2.33',
+                  '64:ff9b::192.0.2.33',
+                  '153.62.233.175',
+                  '190.221.197.185',
+                  '74.113.230.232',
+                  '200.111.165.133',
+                  '162.183.161.107',
+                  '186.46.169.111',
+                  '2.212.33.13',
+                  '185.131.172.72',
+                  '95.90.247.222',
+                  '147.81.126.149',
+                  '0:0:0:0:0:0:10.0.0.1'
+                  ]
+
+        urls = [
+            'https://attraction.example.com/books.php',
+            'http://www.example.com/',
+            'https://www.example.com/attack/arithmetic',
+            'http://www.example.com/',
+            'https://account.example.org/?apparel=achiever&bird=bird',
+            'https://airplane.example.com/',
+            'http://www.example.com/arch/appliance.php',
+            'https://example.com/',
+            'http://www.example.org/?bells=babies&bed=bike#baseball',
+            'https://example.com/books.aspx',
+        ]
+        for ip in ipList:
+            self.assertEqual(self.feautureExtraction.has_ip(ip), 1)
+        for url in urls:
+            self.assertEqual(self.feautureExtraction.has_ip(url), 0)
+
         self.assertEqual(self.feautureExtraction.has_ip(
             'https://stackoverflow.com'), 0)
         self.assertEqual(self.feautureExtraction.has_ip(
             'http://1563:6ae1:4cab:a557:0d6d:af67:6b44:2be1/2/paypal.ca/index.html'), 1)
+        self.assertEqual(self.feautureExtraction.has_ip(
+            '1563:6ae1:4cab:a557:0d6d:af67:6b44:2be1'), 1)
         self.assertEqual(self.feautureExtraction.has_ip(
             'http://125.98.3.123/fake.html'), 1)
 
