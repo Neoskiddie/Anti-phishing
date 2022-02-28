@@ -3,9 +3,21 @@ from feauture_extraction import *
 
 
 class TestFeautureExtraction(unittest.TestCase):
-    def setUp(self):
-        self.URL = 'https://stackoverflow.com'
-        self.feautureExtraction = UrlFeautures(self.URL)
+    URL = "https://stackoverflow.com"
+    EXAMPLE_URLS = [
+        'https://attraction.example.com/books.php',
+        'http://www.example.com/',
+        'https://www.example.com/attack/arithmetic',
+        'http://www.example.com/',
+        'https://account.example.org/?apparel=achiever&bird=bird',
+        'https://airplane.example.com/',
+        'http://www.example.com/arch/appliance.php',
+        'https://example.com/',
+        'http://www.example.org/?bells=babies&bed=bike#baseball',
+        'https://example.com/books.aspx',
+    ]
+
+    feautureExtraction = UrlFeautures(URL)
 
     def test_has_ip(self):
         ipList = ['1::',
@@ -52,21 +64,9 @@ class TestFeautureExtraction(unittest.TestCase):
                   '0:0:0:0:0:0:10.0.0.1'
                   ]
 
-        urls = [
-            'https://attraction.example.com/books.php',
-            'http://www.example.com/',
-            'https://www.example.com/attack/arithmetic',
-            'http://www.example.com/',
-            'https://account.example.org/?apparel=achiever&bird=bird',
-            'https://airplane.example.com/',
-            'http://www.example.com/arch/appliance.php',
-            'https://example.com/',
-            'http://www.example.org/?bells=babies&bed=bike#baseball',
-            'https://example.com/books.aspx',
-        ]
         for ip in ipList:
             self.assertEqual(self.feautureExtraction.has_ip(ip), 1)
-        for url in urls:
+        for url in self.EXAMPLE_URLS:
             self.assertEqual(self.feautureExtraction.has_ip(url), 0)
 
         self.assertEqual(self.feautureExtraction.has_ip(
@@ -77,6 +77,21 @@ class TestFeautureExtraction(unittest.TestCase):
             '1563:6ae1:4cab:a557:0d6d:af67:6b44:2be1'), 1)
         self.assertEqual(self.feautureExtraction.has_ip(
             'http://125.98.3.123/fake.html'), 1)
+
+    def test_is_url_short(self):
+        shortUrls = [
+            'https://t.co/G8QZxw7wS1',
+            'https://bit.ly/3M8uKLz',
+            'https://tinyurl.com/yckt9f9s',
+            'http://tiny.cc/h12puz',
+            'shorturl.at/uxMQ6',
+        ]
+        for url in shortUrls:
+            self.assertEqual(self.feautureExtraction.is_url_short(url), 1)
+
+        for example_url in self.EXAMPLE_URLS:
+            self.assertEqual(
+                self.feautureExtraction.is_url_short(example_url), 0)
 
     def test_getDotsInHostname(self):
         self.assertEqual(

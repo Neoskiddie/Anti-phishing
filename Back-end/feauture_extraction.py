@@ -69,6 +69,31 @@ class UrlFeautures():
         else:
             return 0
 
+    def is_url_short(self, url):
+        match = re.search(
+            'zi\.mu|zi\.ma|yhoo\.it|yfrog\.com|yep\.it|y\.ahoo\.it|xurl\.es|xrl\.us|'
+            'xrl\.in|wp\.me|url\.ie|url\.co\.uk|url\.az|ur1\.ca|u\.nu|twurl\.nl|twurl\.cc|'
+            'tr\.im|to\.ly|tnij\.org|tinyurl\.com|tinylink\.in|tiny\.pl|tiny\.ly|tiny\.cc|'
+            'tcrn\.ch|ta\.gd|t\.co|t\.cn|su\.pr|sp2\.ro|snurl\.com|snipurl\.com|snipr\.com|'
+            'shrt\.st|shorturl\.com|short\.ie|shorl\.com|shar\.es|sameurl\.com|safe\.mn|post\.ly|'
+            'ping\.fm|ow\.ly|om\.ly|nyti\.ms|nsfw\.in|moby\.to|migre\.me|lnkd\.in|linkbun\.ch|'
+            'linkbee\.com|liip\.to|krunchd\.com|korta\.nu|j\.mp|is\.gd|hurl\.me|huff\.to|goo\.gl|'
+            'fwd4\.me|fff\.to|ff\.im|fb\.me|fav\.me|eepurl\.com|doiop\.com|dlvr\.it|disq\.us|'
+            'digg\.com|digbig\.com|decenturl\.com|cutt\.us|cot\.ag|cli\.gs|clck\.ru|cl\.ly|'
+            'chilp\.it|budurl\.com|bit\.ly|binged\.it|bacn\.me|arst\.ch|alturl\.com|afx\.cc|'
+            'adjix\.com|adf\.ly|4sq\.com|3\.ly|0rz\.tw|we\.tl|ouo\.io|bfy\.tw|bit\.do|'
+            'bit\.ly|goo\.gl|shorte\.st|go2l\.ink|x\.co|ow\.ly|t\.co|tinyurl|tr\.im|is\.gd|cli\.gs|'
+            'yfrog\.com|migre\.me|ff\.im|tiny\.cc|url4\.eu|twit\.ac|su\.pr|twurl\.nl|snipurl\.com|'
+            'short\.to|BudURL\.com|ping\.fm|post\.ly|Just\.as|bkite\.com|snipr\.com|fic\.kr|loopt\.us|'
+            'doiop\.com|short\.ie|kl\.am|wp\.me|rubyurl\.com|om\.ly|to\.ly|bit\.do|t\.co|lnkd\.in|'
+            'db\.tt|qr\.ae|adf\.ly|goo\.gl|bitly\.com|cur\.lv|tinyurl\.com|ow\.ly|bit\.ly|ity\.im|'
+            'q\.gs|is\.gd|po\.st|bc\.vc|twitthis\.com|u\.to|j\.mp|buzurl\.com|cutt\.us|u\.bb|yourls\.org|'
+            'x\.co|prettylinkpro\.com|scrnch\.me|filoops\.info|vzturl\.com|qr\.net|1url\.com|tweez\.me|v\.gd|tr\.im|link\.zip\.net|shorturl\.at', url)
+        if match:
+            return 1
+        else:
+            return 0
+
     def getDotsInHostname(self, url):
         return urlparse(url).netloc.count(".")
 
