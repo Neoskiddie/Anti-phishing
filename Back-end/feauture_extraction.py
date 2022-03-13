@@ -1,34 +1,19 @@
 
 # Helper libraries
 import pandas as pd
-import time
 import re
 
 # libraries for parsing the URLs
-import ipaddress
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse
 # https://github.com/Chandni97/PhishDetect/blob/master/extract_feature.py
 # https://github.com/ESDAUNG/Phishing-URL-Detection/blob/main/Feature_extraction.java
 # https://github.com/shreyagopal/Phishing-Website-Detection-by-Machine-Learning-Techniques/blob/master/URL%20Feature%20Extraction.ipynb
-# apparently TensorFlow converts capital letters to lower letters, so no camel case
-FEAUTURE_NAMES = [
-    'number_of_dots_in_hostname',
-    'has_at_sign',
-    'has_https',
-    'host_name_length',
-    'has_hyphen_or_underscore',
-    'base_url_length',
-    'is_phishing',
-]
 
 
 class UrlFeautures():
-    url = ''
-    feautures = []
 
     def __init__(self, url: str):
-        self.url = url
-        self.feautures = self.extractFeautures()
+        self.set_feautures_list(url)
 
     def has_ip(self, url):
         '''
@@ -70,6 +55,10 @@ class UrlFeautures():
             return 0
 
     def is_url_short(self, url):
+        """Simple method that does regex search for a list of URL shortening domains
+        The basic list was taken from https://github.com/Chandni97/PhishDetect/blob/master/extract_feature.py
+        combined with list from https://meta.stackoverflow.com/questions/313621/blacklist-the-use-of-common-link-shorteners-in-posts
+        there are likely duplicates form both lists"""
         match = re.search(
             'zi\.mu|zi\.ma|yhoo\.it|yfrog\.com|yep\.it|y\.ahoo\.it|xurl\.es|xrl\.us|'
             'xrl\.in|wp\.me|url\.ie|url\.co\.uk|url\.az|ur1\.ca|u\.nu|twurl\.nl|twurl\.cc|'
@@ -94,47 +83,104 @@ class UrlFeautures():
         else:
             return 0
 
-    def getDotsInHostname(self, url):
+    def get_dots_in_hostname(self, url):
+        """Basic idea is that more dots in domain part = Sub Domain and Multi Sub Domains"""
         return urlparse(url).netloc.count(".")
 
-    def hasAtSign(self, url):
+    def has_at_sign(self, url):
         if "@" in url:
             return 1
         return 0
 
-    def hasHttps(self, url):
+    # def has_double_slash(self, url):
+    #    if "//" in urlparse(url).netloc:
+    #        return 1
+    #    return 0
+
+    def has_double_slash(self, url):
+        # since the position starts from, we have given 6 and not 7 which is according to the document
+        list = [x.start(0) for x in re.finditer('//', url)]
+        if list[len(list)-1] > 6:
+            return 1
+        else:
+            return 0
+
+    def has_hyphen_domain(self, url):
+        if "-" in urlparse(url).netloc:
+            return 1
+        return 0
+
+    def has_https(self, url):
         if urlparse(url).scheme == "https":
             return 1
         return 0
 
-    def getHostLength(self, url):
+    def get_host_length(self, url):
         return len(urlparse(url).netloc)
 
-    def hasHyphenOrUnderscore(self, url):
+    def has_hyphen_or_underscore(self, url):
         if ("_" in url or "-" in url):
             return 1
         return 0
 
-    def getBaseUrlLength(self, url):
+    def get_base_url_length(self, url):
         parsedUrl = urlparse(url)
         return len(parsedUrl.scheme) + len(parsedUrl.netloc) + len(parsedUrl.path)
 
-    def extractFeautures(self):
+    def get_feautures_list(self):
+        return self.feautures
+
+    def set_feautures_list(self, url):
+        self.feautures = [
+            self.has_ip(url),
+            self.is_url_short(url),
+            self.get_dots_in_hostname(url),
+            self.has_at_sign(url),
+            self.has_double_slash(url),
+            self.has_hyphen_domain(url),
+            self.has_https(url),
+            self.get_host_length(url),
+            self.has_hyphen_or_underscore(url),
+            self.get_base_url_length(url),
+        ]
+
+    def get_feautures_names(self):
+        """Get names of all the methods in the class as a list.
+        This will be used as column names in the Dataframe.
+        Doesn't seem to be better way than to call __name__ on each method.
+        The best would be to somehow automatically call this on all methods in the class.
+        But I don't know how to do it without overcomplicaitng things."""
         return [
-            self.getDotsInHostname(self.url),
-            self.hasAtSign(self.url),
-            self.hasHttps(self.url),
-            self.getHostLength(self.url),
-            self.hasHyphenOrUnderscore(self.url),
-            self.getBaseUrlLength(self.url),
+            self.has_ip.__name__,
+            self.is_url_short.__name__,
+            self.get_dots_in_hostname.__name__,
+            self.has_at_sign.__name__,
+            self.has_double_slash.__name__,
+            self.has_hyphen_domain.__name__,
+            self.has_https.__name__,
+            self.get_host_length.__name__,
+            self.has_hyphen_or_underscore.__name__,
+            self.get_base_url_length.__name__,
         ]
 
 
 class UrlFeaturesWithLabel(UrlFeautures):
     def __init__(self, url: str, label: int):
-        self.url = url
-        self.feautures = self.extractFeautures()
+        #self.feautures = self.get_feautures_list(url)
+        self.set_feautures_list(url, label)
+
+    def set_feautures_list(self, url, label):
+        """Setting the feautures, same as base class
+        and adding the label."""
+        super().set_feautures_list(url)
         self.feautures.append(label)
+
+    def get_feautures_names(self):
+        """Overriding feauture names and adding the label for clasificaiton"""
+        feauture_names = super().get_feautures_names()
+        feauture_names.append('is_phishing')
+        print(feauture_names)
+        return feauture_names
 
 
 class DataSet:
@@ -159,7 +205,7 @@ class DataSet:
             feautureExtraction = UrlFeaturesWithLabel(url, is_phishing)
             phishingFeatures.append(feautureExtraction.feautures)
 
-        return pd.DataFrame(phishingFeatures, columns=FEAUTURE_NAMES)
+        return pd.DataFrame(phishingFeatures, columns=feautureExtraction.get_feautures_names())
 
     def createLegitimateDataFrame(self):
         legi_features = []
@@ -176,7 +222,7 @@ class DataSet:
             feautureExtraction = UrlFeaturesWithLabel(url, is_phishing)
             legi_features.append(feautureExtraction.feautures)
 
-        return pd.DataFrame(legi_features, columns=FEAUTURE_NAMES)
+        return pd.DataFrame(legi_features, columns=feautureExtraction.get_feautures_names())
 
     def createDataSet(self):
         # concat both of the sets
@@ -192,5 +238,5 @@ if (__name__ == '__main__'):
     pd.set_option("display.max_columns", None)
     legitURLs = pd.read_csv("/tmp/legitUrls.csv")
     phishingURLs = pd.read_csv("/tmp/phishingUrls.csv")
-    dataSet = DataSet(legitURLs, phishingURLs, 500)
+    dataSet = DataSet(legitURLs, phishingURLs, 5000)
     urldata = dataSet.data

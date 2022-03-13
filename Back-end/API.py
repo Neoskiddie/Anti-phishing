@@ -43,20 +43,18 @@ def isPhishing(url):
 def sendAPIRequest(url):
     # first one is not phishing, second one is phishing
     print("The visited url is: " + url)
-    urlFeautures = fe.UrlFeautures(url).extractFeautures()
-    # TODO
-    # this is horrible, need to change it to something more explicit, maybe use enum?
-    data = {
-        fe.FEAUTURE_NAMES[0]: [[urlFeautures[0]]],
-        fe.FEAUTURE_NAMES[1]: [[urlFeautures[1]]],
-        fe.FEAUTURE_NAMES[2]: [[urlFeautures[2]]],
-        fe.FEAUTURE_NAMES[3]: [[urlFeautures[3]]],
-        fe.FEAUTURE_NAMES[4]: [[urlFeautures[4]]],
-        fe.FEAUTURE_NAMES[5]: [[urlFeautures[5]]]
-    }
+    urlFeautures = fe.UrlFeautures(url)
+    urlFeauturesList = urlFeautures.get_feautures_list()
+    urlFeauturesNamesList = urlFeautures.get_feautures_names()
+
+    data = {}
+    for i in range(len(urlFeauturesList)):
+        # this needs to be a element in a list
+        data[urlFeauturesNamesList[i]] = [[urlFeauturesList[i]]]
 
     json = {"inputs": data}
 
+    print(json)
     response = requests.post(url=API_ENDPOINT, json=json)
     jsonOutput = response.json()
     output = jsonOutput['outputs'][0][0]
