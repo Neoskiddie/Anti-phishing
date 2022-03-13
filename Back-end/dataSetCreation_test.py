@@ -33,18 +33,32 @@ class TestFeautureExtraction(unittest.TestCase):
     def test_legitURLs(self):
         # not sure why but when creating np array it's using int32, while the one
         # from the DataFrame is int64, so need to specify that here
-        testData = np.array([[2, 0, 1, 14, 0, 19, 0],
-                             [1, 0, 1, 17, 0, 22, 0]], dtype=np.int64)
-        testDataFrame = pd.DataFrame(testData, columns=fe.FEAUTURE_NAMES)
+        # This test compares output of the feautre extractiona against an array of hardcoded values.
+        # TODO: It's BROKEN, fix it
+        # self.has_ip(url),
+        # self.is_url_short(url),
+        # self.getDotsInHostname(url),
+        # self.hasAtSign(url),
+        # self.has_double_slash(url),
+        # self.has_hyphen_domain(url),
+        # self.hasHttps(url),
+        # self.getHostLength(url),
+        # self.hasHyphenOrUnderscore(url),
+        # self.getBaseUrlLength(url),
+        testData = np.array([[0, 0, 2, 0, 1, 0, 0, 0, 0, 14, 0, 19, 0],
+                             [0, 0, 1, 0, 1, 17, 0, 22, 0]], dtype=np.int64)
+        testDataFrame = pd.DataFrame(
+            testData, columns=fe.UrlFeaturesWithLabel.getFeauturesNames())
         pd_testing.assert_frame_equal(
             self.set.createLegitimateDataFrame(), testDataFrame)
 
     def test_phishingURLs(self):
         # not sure why but when creating np array it's using int32, while the one
         # from the DataFrame is int64, so need to specify that here
-        testData = np.array([[3, 0, 0, 22, 0, 27, 1],
-                             [3, 0, 0, 29, 0, 33, 1]], dtype=np.int64)
-        testDataFrame = pd.DataFrame(testData, columns=fe.FEAUTURE_NAMES)
+        testData = np.array([[0, 0, 3, 0, 0, 22, 0, 27, 1],
+                             [0, 0, 3, 0, 0, 29, 0, 33, 1]], dtype=np.int64)
+        testDataFrame = pd.DataFrame(
+            testData, columns=fe.UrlFeaturesWithLabel.getFeauturesNames())
         pd_testing.assert_frame_equal(
             self.set.createPhishingDataFrame(), testDataFrame)
 
