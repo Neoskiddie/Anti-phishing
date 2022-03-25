@@ -6,10 +6,12 @@ import requests
 import urllib.parse  # needed to decode URL passed from the extension
 import feauture_extraction as fe
 
+from colorama import Fore, Style  # fancy colours in terminal
+
 HOST = '212.71.244.118'
 #HOST = '127.0.0.1'
 PORT = '8501'
-MODEL_NAME = 'phishingModel'
+MODEL_NAME = 'phishingModelAllUrlFeautures'
 API_ENDPOINT = 'http://' + HOST + ':' + PORT + \
     '/v1/models/' + MODEL_NAME + ':predict'
 
@@ -25,7 +27,7 @@ class Check(Resource):  # Flask needs to know that this class is an endpoint for
 
         encodedUrl = args['url']
         url = urllib.parse.unquote(encodedUrl)
-        print("url is: " + url)
+        #print("url is: " + url)
         # Hardcoded "phishing" site is notreal.test
         # The front-end will block site if response is "true"
         answer = "false"
@@ -36,13 +38,14 @@ class Check(Resource):  # Flask needs to know that this class is an endpoint for
 
 def isPhishing(url):
     sendAPIRequest(url)
-    if "notreal.text" in url:
+    if "notreal.test" in url:
         return True
 
 
 def sendAPIRequest(url):
+    print('--------------------------------------------------------------------------------')
     # first one is not phishing, second one is phishing
-    print("The visited url is: " + url)
+    print(Fore.GREEN + 'The visited url is: ' + Style.RESET_ALL + url)
     urlFeautures = fe.UrlFeautures(url)
     urlFeauturesList = urlFeautures.get_feautures_list()
     urlFeauturesNamesList = urlFeautures.get_feautures_names()
@@ -54,12 +57,16 @@ def sendAPIRequest(url):
 
     json = {"inputs": data}
 
-    print(json)
+    print(Fore.GREEN + 'The JSON data send to server: ' +
+          Style.RESET_ALL + str(json))
     response = requests.post(url=API_ENDPOINT, json=json)
     jsonOutput = response.json()
+    #print('Server JSON response: ' + str(jsonOutput))
     output = jsonOutput['outputs'][0][0]
-    print(output)
-    print(type(output))
+    print(Fore.GREEN + 'Reponse from the ML model - chances the website is phishing: ' + Fore.RED +
+          str(output) + Style.RESET_ALL)
+    print('--------------------------------------------------------------------------------')
+    # print(type(output))
 
 
 api.add_resource(Check, '/check')  # '/check' is entry point of the API
