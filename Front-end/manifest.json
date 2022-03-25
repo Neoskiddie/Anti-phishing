@@ -4,7 +4,7 @@
   "author": "Grzegorz Bronka",
   "version": "1.0",
   "manifest_version": 2,
-  "options_page": "options.html",
+  "options_page": "html/options.html",
   "permissions": [
     "webRequest",
     "webRequestBlocking",
@@ -24,5 +24,9 @@
     "32": "/images/32.png",
     "48": "/images/48.png",
     "128": "/images/128.png"
+  },
+  "browser_action": {
+    "default_icon": "/images/128.png",
+    "default_popup": "html/popup.html"
   }
 }
