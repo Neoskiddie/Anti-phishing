@@ -9,7 +9,22 @@ document.getElementById("backButton").onclick = function () {
   history.back()
 }
 
-document.getElementById("visitButton").onclick = function () {
-  // TODO add it to whitelist
+const readLocalStorage = async (key) => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get([key], function (result) {
+      if (result[key] === undefined) {
+        reject();
+      } else {
+        resolve(result[key]);
+      }
+    });
+  });
+};
+
+document.getElementById("visitButton").onclick = async () => {
+  const hostname = new URL(maliciousUrl).hostname;
+  let whitelist = await readLocalStorage('whitelist');
+  whitelist.push(hostname)
+  chrome.storage.local.set({ whitelist });
   location.href = maliciousUrl;
-}
+};
