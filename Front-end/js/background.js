@@ -22,7 +22,14 @@ function IsURLMalicious(URL) {
     try {
         var rawResponse = httpGet(serverUrl + encodedUrl)
     } catch (err) {
-        alert('The extension server is unavailable!')
+        let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
+        if (confirmAction) {
+            const enabled = false
+            chrome.storage.local.set({ enabled });
+            alert("Extension disabled. You can enable it again in the extension settings.");
+        } else {
+          alert("Action canceled");
+        }
         console.log(err);
         return false;
     }
