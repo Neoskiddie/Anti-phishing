@@ -1,18 +1,143 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Block Site</title>
+    <title>Block Site</title>
+    <style type="text/css">
+        body {
+            margin: 40px auto;
+            max-width: 650px;
+            line-height: 1.6;
+            font-size: 18px;
+            background-color: #121212;
+            color: #BBB;
+            padding: 0 10px
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2
+        }
+
+        /*switches*/
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        .push_button {
+            position: relative;
+            width: 120px;
+            height: 40px;
+            text-align: center;
+            color: #FFF;
+            text-decoration: none;
+            line-height: 43px;
+            font-family: 'Oswald', Helvetica;
+            display: block;
+            margin: 30px;
+        }
+
+        .blue {
+            text-shadow: -1px -1px 0 #2C7982;
+            background: #3EACBA;
+            border: 1px solid #379AA4;
+            background-image: -webkit-linear-gradient(top, #48C6D4, #3EACBA);
+            background-image: -moz-linear-gradient(top, #48C6D4, #3EACBA);
+            background-image: -ms-linear-gradient(top, #48C6D4, #3EACBA);
+            background-image: -o-linear-gradient(top, #48C6D4, #3EACBA);
+            background-image: linear-gradient(top, #48C6D4, #3EACBA);
+
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+
+            -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #338A94, 0 4px 2px rgba(0, 0, 0, .5);
+            -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #338A94, 0 4px 2px rgba(0, 0, 0, .5);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 -1px 0 rgba(255, 255, 255, .1) inset, 0 4px 0 #338A94, 0 4px 2px rgba(0, 0, 0, .5);
+        }
+
+        .blue:hover {
+            background: #48C6D4;
+            background-image: -webkit-linear-gradient(top, #3EACBA, #48C6D4);
+            background-image: -moz-linear-gradient(top, #3EACBA, #48C6D4);
+            background-image: -ms-linear-gradient(top, #3EACBA, #48C6D4);
+            background-image: -o-linear-gradient(top, #3EACBA, #48C6D4);
+            background-image: linear-gradient(top, #3EACBA, #48C6D4);
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>White list</h1>
+    <span>DISABLE</span>
+    <label class="switch">
+        <input id="checkbox" type="checkbox" checked>
+        <span class="slider round"></span>
+    </label>
+    <span>ENABLE</span>
+    <h2>White list</h2>
 
-<textarea id="textarea" rows="10" cols="30" spellcheck="false"></textarea>
-<br>
+    <textarea id="textarea" rows="10" cols="30" spellcheck="false"></textarea>
+    <br>
 
-<button id="save">Save</button>
-<strong>Enabled?</strong><input id="checkbox" type="checkbox">
-
-<script src="../js/options.js"></script>
+    <button id="save" class="push_button blue">Save</button>
+    <script src="../js/options.js"></script>
 </body>
+
 </html>
