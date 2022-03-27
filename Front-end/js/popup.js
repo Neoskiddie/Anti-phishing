@@ -1,6 +1,6 @@
 document.getElementById('options').onclick = openOps;
 document.getElementById('about').onclick = openAbout;
-var checkbox = document.getElementById("checkbox");
+var checkbox = document.getElementById("myonoffswitch");
 function openOps() {
     chrome.runtime.openOptionsPage()
 };

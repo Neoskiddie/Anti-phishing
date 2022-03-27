@@ -21,6 +21,91 @@
             text-align: center;
         }
 
+        /*-------------------------------------------------------------------------------- */
+        .onoffswitch {
+            position: relative;
+            margin: auto;
+            width: 90px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .onoffswitch-checkbox {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .onoffswitch-label {
+            display: block;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid #999999;
+            border-radius: 20px;
+        }
+
+        .onoffswitch-inner {
+            display: block;
+            width: 200%;
+            margin-left: -100%;
+            transition: margin 0.3s ease-in 0s;
+        }
+
+        .onoffswitch-inner:before,
+        .onoffswitch-inner:after {
+            display: block;
+            float: left;
+            width: 50%;
+            height: 30px;
+            padding: 0;
+            line-height: 30px;
+            font-size: 14px;
+            color: white;
+            font-family: Trebuchet, Arial, sans-serif;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .onoffswitch-inner:before {
+            content: "ON";
+            padding-left: 10px;
+            background-color: #0AF574;
+            color: #FFFFFF;
+        }
+
+        .onoffswitch-inner:after {
+            content: "OFF";
+            padding-right: 10px;
+            background-color: #FF0000;
+            color: #FFFFFF;
+            text-align: right;
+        }
+
+        .onoffswitch-switch {
+            display: block;
+            width: 18px;
+            margin: 6px;
+            background: #FFFFFF;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 56px;
+            border: 2px solid #999999;
+            border-radius: 20px;
+            transition: all 0.3s ease-in 0s;
+        }
+
+        .onoffswitch-checkbox:checked+.onoffswitch-label .onoffswitch-inner {
+            margin-left: 0;
+        }
+
+        .onoffswitch-checkbox:checked+.onoffswitch-label .onoffswitch-switch {
+            right: 0px;
+        }
+
+        /*-------------------------------------------------------------------------------- */
+
         .push_button {
             position: relative;
             width: 120px;
@@ -96,9 +181,18 @@
 <body>
     <div>
         <p>Anti-phishing</p>
+        <div class="onoffswitch">
+            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch" tabindex="0" checked>
+            <label class="onoffswitch-label" for="myonoffswitch">
+                <span class="onoffswitch-inner"></span>
+                <span class="onoffswitch-switch"></span>
+            </label>
+       </div>
         <a id="options" class="push_button blue" href="#">Options</a>
         <a id="about" class="push_button red" href="#">HELP</a>
+
     </div>
     <script src="../js/popup.js"></script>
 </body>
+
 </html>
