@@ -1,6 +1,6 @@
 const textarea = document.getElementById("textarea");
 const save = document.getElementById("save");
-const checkbox = document.getElementById("checkbox");
+const checkbox = document.getElementById("myonoffswitch");
 
 save.addEventListener("click", () => {
   const whitelist = textarea.value.split("\n").map(s => s.trim()).filter(Boolean);
