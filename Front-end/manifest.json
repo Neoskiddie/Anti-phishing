@@ -9,7 +9,11 @@
     "webRequest",
     "webRequestBlocking",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "storage",
+    "activeTab", 
+    "tabs",
+    "scripting"
   ],
   "web_accessible_resources": [
     "html/warning.html"

@@ -1,3 +1,6 @@
+var is_enabled = true // this variable is responsible for keeping whether the URLs are checked for phishing, corresponds to "enabled" storage variable
+var whitelist // also local variable corresponding to storage "whitelist" with list of whitelisted websites.
+
 chrome.runtime.onInstalled.addListener(function () {
     chrome.storage.local.get(["whitelist", "enabled"], function (local) {
         if (!Array.isArray(local.whitelist)) {
@@ -5,39 +8,20 @@ chrome.runtime.onInstalled.addListener(function () {
         }
 
         if (typeof local.enabled !== "boolean") {
-            chrome.storage.local.set({ enabled: false });
+            chrome.storage.local.set({ enabled: true });
         }
     });
 });
 
-//chrome.tabs.onUpdated.addListener(function (tabId, changeInfo) {
-//    const url = changeInfo.pendingUrl || changeInfo.url;
-//    if (!url || !url.startsWith("http")) {
-//        return;
-//    }
-//
-//    const hostname = new URL(url).hostname;
-//
-//    chrome.storage.local.get(["whitelist", "enabled"], function (local) {
-//        const { whitelist, enabled } = local;
-//        if (Array.isArray(whitelist) && enabled && whitelist.find(domain => hostname.includes(domain))) {
-//            chrome.tabs.remove(tabId);
-//        }
-//    });
-//});
-
-
-
 // Check if URL is malicious by calling the backend server API
 function IsURLMalicious(URL) {
-    // for now backend has hardcoded response for http://notreal.test to be a malicious website
+    // backend has a hardcoded response for http://notreal.test to be a malicious website
     console.log('IsURLMalicious')
     const serverUrl = "http://127.0.0.1:5000/check?url="
     const encodedUrl = encodeURIComponent(URL);
     try {
         var rawResponse = httpGet(serverUrl + encodedUrl)
     } catch (err) {
-        // TODO display error message to user
         alert('The extension server is unavailable!')
         console.log(err);
         return false;
@@ -79,24 +63,38 @@ function httpGet(url) {
       });
     });
   };
+// fuction called whenever change is made to storage values
+// It logs the values to console and also passes the values to local variables
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+    console.log(
+      `Storage key "${key}" in namespace "${namespace}" changed.`,
+      `Old value was "${oldValue}", new value is "${newValue}".`
+    );
+    if (key === "enabled"){
+            is_enabled = newValue
+       }
+       if (key === "whitelist") {
+        whitelist = newValue
+       }
+  }
+});
 
 // Function called befor a request is made by the browser
-const callback = async function (requestDetails) {
+const callback = function (requestDetails) {
     const url = requestDetails.url;
     const hostname = new URL(url).hostname;
 
-    let isEnabled = await readLocalStorage('enabled');
-    let whitelist = await readLocalStorage('whitelist');
     let isHostnameWhitelisted = false;
 
 
     if (Array.isArray(whitelist) && whitelist.find(domain => hostname.includes(domain))) {
         isHostnameWhitelisted = true;
     }
-    console.log('isEnabled is: ' + isEnabled)
+    console.log('isEnabled is: ' + is_enabled)
     console.log('is hostname whitelisted: ' + isHostnameWhitelisted)
 
-    if (!isEnabled || isHostnameWhitelisted) {
+    if (!is_enabled || isHostnameWhitelisted) {
         return;
     }
     //chrome.storage.local.get(["whitelist", "enabled"], function (local) {
