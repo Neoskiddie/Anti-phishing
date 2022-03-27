@@ -4,7 +4,7 @@ var whitelist // also local variable corresponding to storage "whitelist" with l
 chrome.runtime.onInstalled.addListener(function () {
     chrome.storage.local.get(["whitelist", "enabled"], function (local) {
         if (!Array.isArray(local.whitelist)) {
-            chrome.storage.local.set({ whitelist: [] });
+            chrome.storage.local.set({ whitelist: ["gbronka.com"] });
         }
 
         if (typeof local.enabled !== "boolean") {
