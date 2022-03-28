@@ -1,3 +1,7 @@
+* {
+    font-family: 'Oswald', Helvetica !important;
+}
+
 body {
     margin: 10px auto;
     max-width: 650px;
