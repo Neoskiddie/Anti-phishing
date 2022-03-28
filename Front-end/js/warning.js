@@ -1,14 +1,19 @@
 const queryString = window.location.search;
-console.log(queryString);
 const urlParams = new URLSearchParams(queryString);
 const maliciousUrl = urlParams.get("originalurl");
-console.log(maliciousUrl);
 document.getElementById('maliciousUrl').innerText = maliciousUrl
 
+/**
+ * Navigate back in history.
+ */
 document.getElementById("backButton").onclick = function () {
   history.back()
 }
 
+/**
+ * Asynchronous method to get value from storage key
+ * from https://stackoverflow.com/questions/59440008/how-to-wait-for-asynchronous-chrome-storage-local-get-to-finish-before-continu
+ */
 const readLocalStorage = async (key) => {
   return new Promise((resolve, reject) => {
     chrome.storage.local.get([key], function (result) {
@@ -21,6 +26,10 @@ const readLocalStorage = async (key) => {
   });
 };
 
+/**
+ * Fired when a button to visit the "malicous" website is pressed.
+ * Adds the URL to the whitelist in storage and then navigates to the website.
+ */
 document.getElementById("visitButton").onclick = async () => {
   const hostname = new URL(maliciousUrl).hostname;
   let whitelist = await readLocalStorage('whitelist');

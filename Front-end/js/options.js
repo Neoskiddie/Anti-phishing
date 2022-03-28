@@ -20,7 +20,6 @@ checkbox.addEventListener("change", (event) => {
 
 /**
  * Updated textarea and checkbox on page load 
- * 
  */
 window.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get(["whitelist", "enabled"], function (local) {
@@ -31,7 +30,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 /**
  * Listens for changes in the storage 

@@ -1,23 +1,19 @@
 var is_enabled = true // this variable is responsible for keeping whether the URLs are checked for phishing, corresponds to "enabled" storage variable
-var whitelist // also local variable corresponding to storage "whitelist" with list of whitelisted websites.
+var whitelist = []// also local variable corresponding to storage "whitelist" with list of whitelisted websites.
 
-chrome.runtime.onInstalled.addListener(function () {
-    chrome.storage.local.get(["whitelist", "enabled"], function (local) {
-        if (!Array.isArray(local.whitelist)) {
-            chrome.storage.local.set({ whitelist: ["gbronka.com"] });
-        }
+// filter all url types and only the main frame (a document that is loaded for a top-level frame) - https://stackoverflow.com/questions/36207557/chrome-webrequest-listening-to-only-user-entered-urls
+const filter = { urls: ["http://*/*", "https://*/*"], types: ['main_frame'] };
+const opt_extraInfoSpec = ["blocking"];
 
-        if (typeof local.enabled !== "boolean") {
-            chrome.storage.local.set({ enabled: true });
-        }
-    });
-});
 
-// Check if URL is malicious by calling the backend server API
+/**
+ * Check if URL is malicious by calling the backend server API
+ * The method returns false whenever error hapens to avoid
+ * blocking browsign experience. 
+ */
 function IsURLMalicious(URL) {
     // backend has a hardcoded response for http://notreal.test to be a malicious website
-    console.log('IsURLMalicious')
-    const serverUrl = "http://127.0.0.1:5000/check?url="
+    const serverUrl = "http://127.0.0.1:5000/check?url=" // TODO: Move API to the remote server. 
     const encodedUrl = encodeURIComponent(URL);
     try {
         var rawResponse = httpGet(serverUrl + encodedUrl)
@@ -44,10 +40,10 @@ function IsURLMalicious(URL) {
     }
 }
 
-/*
- From: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
- For now using deprecated synchronous request. However, for the purpose of anti-phishing
- it makes sens to block main thread and wait for the response from the serve.
+/** 
+ * From: https://stackoverflow.com/questions/247483/http-get-request-in-javascript
+ * Using deprecated synchronous request. However, for the purpose of anti-phishing
+ * it makes sens to block main thread and wait for the response from the serve.
  */
 function httpGet(url) {
     const xmlHttpRequest = new XMLHttpRequest();
@@ -55,39 +51,12 @@ function httpGet(url) {
     xmlHttpRequest.send(null);
     return xmlHttpRequest;
 }
-// this method is to get the storage asynchronously
-// I didn't understand why I coudn't get the storage and this was a reason.
-// So this method solves that by allowing to await the method
-// It was found https://stackoverflow.com/questions/59440008/how-to-wait-for-asynchronous-chrome-storage-local-get-to-finish-before-continu
- const readLocalStorage = async (key) => {
-    return new Promise((resolve, reject) => {
-      chrome.storage.local.get([key], function (result) {
-        if (result[key] === undefined) {
-          reject();
-        } else {
-          resolve(result[key]);
-        }
-      });
-    });
-  };
-// fuction called whenever change is made to storage values
-// It logs the values to console and also passes the values to local variables
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(
-      `Storage key "${key}" in namespace "${namespace}" changed.`,
-      `Old value was "${oldValue}", new value is "${newValue}".`
-    );
-    if (key === "enabled"){
-            is_enabled = newValue
-       }
-       if (key === "whitelist") {
-        whitelist = newValue
-       }
-  }
-});
 
-// Function called befor a request is made by the browser
+/**
+ * Function called befor a request is made by the browser
+ * Calls the IsURLMalicious and depending on resonse
+ * redirects to the warning page.
+ */
 const callback = function (requestDetails) {
     const url = requestDetails.url;
     const hostname = new URL(url).hostname;
@@ -104,11 +73,6 @@ const callback = function (requestDetails) {
     if (!is_enabled || isHostnameWhitelisted) {
         return;
     }
-    //chrome.storage.local.get(["whitelist", "enabled"], function (local) {
-    //    const { whitelist, enabled } = local;
-    //    isEnabled = enabled;
-
-
 
     const isMalicious = IsURLMalicious(url);
     if (isMalicious) {
@@ -117,11 +81,40 @@ const callback = function (requestDetails) {
         return { redirectUrl: warningUrl }
     }
 }
-// filter all url types and only the main frame (a document that is loaded for a top-level frame) - https://stackoverflow.com/questions/36207557/chrome-webrequest-listening-to-only-user-entered-urls
-const filter = { urls: ["http://*/*", "https://*/*"], types: ['main_frame'] };
 
-const opt_extraInfoSpec = ["blocking"];
+/**
+ * Method fired when the extension is installed.
+ * Sets the whitelist to my website and enables the checking of the URLs. 
+ */
+chrome.runtime.onInstalled.addListener(function () {
+    chrome.storage.local.get(["whitelist", "enabled"], function (local) {
+        if (!Array.isArray(local.whitelist)) {
+            chrome.storage.local.set({ whitelist: ["gbronka.com"] });
+        }
+
+        if (typeof local.enabled !== "boolean") {
+            chrome.storage.local.set({ enabled: true });
+        }
+    });
+});
+
+/**
+ * Called whenever change is made to storage values
+ * It logs the values to console and also passes the values to local variables
+ */
+chrome.storage.onChanged.addListener(function (changes) {
+  for (let [key, { newValue }] of Object.entries(changes)) {
+    console.log("New value for key " + key + " is: " + newValue);
+    if (key === "enabled"){
+            is_enabled = newValue
+       }
+       if (key === "whitelist") {
+        whitelist = newValue
+       }
+  }
+});
 
 // callback and filter must be specified
 // If the optional opt_extraInfoSpec array contains the string 'blocking', the callback function is handled synchronously.
+// In case of anti-phishing extension this is desired bahaviour to process this synchronously.
 chrome.webRequest.onBeforeRequest.addListener(callback, filter, opt_extraInfoSpec);
