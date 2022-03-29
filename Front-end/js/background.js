@@ -13,10 +13,11 @@ const opt_extraInfoSpec = ["blocking"];
  */
 function IsURLMalicious(URL) {
     // backend has a hardcoded response for http://notreal.test to be a malicious website
-    const serverUrl = "http://127.0.0.1:5000/check?url=" // TODO: Move API to the remote server. 
+    const serverUrl = "http://212.71.244.118:8080/check" //check?url=" // TODO: Move API to the remote server. 
     const encodedUrl = encodeURIComponent(URL);
     try {
-        var rawResponse = httpGet(serverUrl + encodedUrl)
+        //var rawResponse = httpGet(serverUrl + encodedUrl)
+        var rawResponse = httpPost(serverUrl, encodedUrl)
     } catch (err) {
         let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
         if (confirmAction) {
@@ -50,6 +51,16 @@ function httpGet(url) {
     xmlHttpRequest.open("GET", url, false); // true for asynchronous, false for synchronous
     xmlHttpRequest.send(null);
     return xmlHttpRequest;
+}
+
+function httpPost(server, urlCheck) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", server, false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+        url: urlCheck
+    }));
+    return xhr;
 }
 
 /**

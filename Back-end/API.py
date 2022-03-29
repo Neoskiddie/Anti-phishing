@@ -8,43 +8,68 @@ import feauture_extraction as fe
 
 from colorama import Fore, Style  # fancy colours in terminal
 
-HOST = '212.71.244.118'
+MODEL_HOST = '212.71.244.118'
 #HOST = '127.0.0.1'
 PORT = '8501'
 MODEL_NAME = 'phishingModelAllUrlFeautures'
-API_ENDPOINT = 'http://' + HOST + ':' + PORT + \
+API_ENDPOINT = 'http://' + MODEL_HOST + ':' + PORT + \
     '/v1/models/' + MODEL_NAME + ':predict'
+MAX_ML_OUTPUT = 0.95
+
+# "fake" phishing website used for presentation / testing
+HARDCODED_PHISHING = "notreal.test" 
 
 app = Flask(__name__)
 api = Api(app)
 
-
-class Check(Resource):  # Flask needs to know that this class is an endpoint for our API, and so we pass Resource in with the class definition
-    def get(self):
+class Check(Resource):
+    """
+    Flask needs to know that this class is an endpoint for the API
+    thus Resource must be passed in with the class definition
+    """
+    def post(self):
+        """
+        Parse the URL received from frontend
+        and pass it to other method to check for phishing
+        """
         parser = reqparse.RequestParser()
         parser.add_argument('url', required=True)
         args = parser.parse_args()  # parse arguments to dictionary
 
         encodedUrl = args['url']
         url = urllib.parse.unquote(encodedUrl)
-        #print("url is: " + url)
-        # Hardcoded "phishing" site is notreal.test
+        print("url is: " + url)
+
         # The front-end will block site if response is "true"
         answer = "false"
-        if (isPhishing(url)):
+        if (is_phishing(url)):
             answer = "true"
         return {'answer': answer}, 200
 
 
-def isPhishing(url):
-    sendAPIRequest(url)
-    if "notreal.test" in url:
+def is_phishing(url):
+    """
+    Checks URL with the hardcoded phishing.
+    Even though the Hardcoded phishing is always
+    returning True, the request is sant anyway for
+    purpose of the presentation.
+    """
+    output = send_API_request(url)
+    if HARDCODED_PHISHING in url:
         return True
+    if output >= MAX_ML_OUTPUT:
+        return True
+    return False
 
 
-def sendAPIRequest(url):
+
+def send_API_request(url):
+    """
+    Processes the URL by passing it to UrlFeautures Class
+    Then formats the feautures in the way the Model can accept
+    Finally, the response from the model is returned from the function.
+    """
     print('--------------------------------------------------------------------------------')
-    # first one is not phishing, second one is phishing
     print(Fore.GREEN + 'The visited url is: ' + Style.RESET_ALL + url)
     urlFeautures = fe.UrlFeautures(url)
     urlFeauturesList = urlFeautures.get_feautures_list()
@@ -66,7 +91,7 @@ def sendAPIRequest(url):
     print(Fore.GREEN + 'Reponse from the ML model - chances the website is phishing: ' + Fore.RED +
           str(output) + Style.RESET_ALL)
     print('--------------------------------------------------------------------------------')
-    # print(type(output))
+    return output
 
 
 api.add_resource(Check, '/check')  # '/check' is entry point of the API
