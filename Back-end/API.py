@@ -6,13 +6,16 @@ import requests
 import urllib.parse  # needed to decode URL passed from the extension
 import feauture_extraction as fe
 
+import os
+from dotenv import load_dotenv
+load_dotenv() # take environment variables from .env.
+
 from colorama import Fore, Style  # fancy colours in terminal
 
-MODEL_HOST = '212.71.244.118'
-#HOST = '127.0.0.1'
-PORT = '8501'
-MODEL_NAME = 'phishingModelAllUrlFeautures'
-API_ENDPOINT = 'http://' + MODEL_HOST + ':' + PORT + \
+MODEL_HOST = os.getenv('MODEL_HOST') 
+PORT = os.getenv('PORT')
+MODEL_NAME = os.getenv('MODEL_NAME')
+API_ENDPOINT = MODEL_HOST + ':' + PORT + \
     '/v1/models/' + MODEL_NAME + ':predict'
 MAX_ML_OUTPUT = 0.95
 
@@ -97,4 +100,4 @@ def send_API_request(url):
 api.add_resource(Check, '/check')  # '/check' is entry point of the API
 
 if (__name__ == '__main__'):
-    app.run()
+    app.run(host="0.0.0.0", port=8080)
