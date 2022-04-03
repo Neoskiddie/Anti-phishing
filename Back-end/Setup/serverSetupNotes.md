@@ -1,5 +1,49 @@
 Ubuntu 20.04.3 LTS
 
+First add user with
+`adduser anon`
+`sudo usermod -aG sudo anon`
+Then make .ssh directory in user home:
+`mkdir /home/anon/.ssh`
+`chmod 700 ~/.ssh`
+
+----
+If you are copying key that was used by root:
+then copy the key you used for root to that directory:
+`mv authorized_keys /home/anon/.ssh/`
+then
+`cd /home/anon/.ssh/`
+and change owner of the file:
+`chown anon authorized_keys`
+
+If you generated key yourself:
+On LOCAL system, not remote run: `ssh-keygen -t rsa`
+
+then copy the key to remote with something like:
+`scp –p id_rsa.pub remoteuser@remotehost:`
+
+append the key to authorized keys:
+`cat id_rsa.pub >> ~/.ssh/authorized_keys`
+`rm id_rsa.pub`
+``
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+``
+
+Then go to :
+`sudo vim /etc/ssh/sshd_config`
+
+There uncomment Port and change it to somethign different then default
+```
+Port 6372
+PermitRootLogin no
+PermitEmptyPasswords no
+PasswordAuthentication no
+PubkeyAuthentication yes
+AllowUsers anon
+```
+
+
 Basic setup & docker
 ```
 apt update && apt upgrade -y
