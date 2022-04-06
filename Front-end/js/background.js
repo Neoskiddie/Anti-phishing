@@ -1,4 +1,5 @@
-const ENV =  "PROD"//"DEV" 
+//const ENV =  "PROD"//"DEV" 
+const ENV =  "DEV" 
 var is_enabled = true // this variable is responsible for keeping whether the URLs are checked for phishing, corresponds to "enabled" storage variable
 var whitelist = []// also local variable corresponding to storage "whitelist" with list of whitelisted websites.
 

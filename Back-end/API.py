@@ -4,7 +4,7 @@ from flask import Flask
 from flask_restful import Resource, Api, reqparse
 import requests
 import urllib.parse  # needed to decode URL passed from the extension
-import feauture_extraction as fe
+import feature_extraction as fe
 
 import os
 from dotenv import load_dotenv
@@ -68,20 +68,20 @@ def is_phishing(url):
 
 def send_API_request(url):
     """
-    Processes the URL by passing it to UrlFeautures Class
-    Then formats the feautures in the way the Model can accept
+    Processes the URL by passing it to UrlFeatures Class
+    Then formats the features in the way the Model can accept
     Finally, the response from the model is returned from the function.
     """
     print('--------------------------------------------------------------------------------')
     print(Fore.GREEN + 'The visited url is: ' + Style.RESET_ALL + url)
-    urlFeautures = fe.UrlFeautures(url)
-    urlFeauturesList = urlFeautures.get_feautures_list()
-    urlFeauturesNamesList = urlFeautures.get_feautures_names()
+    url_features = fe.UrlFeatures(url)
+    url_features_list = url_features.get_features_list()
+    url_features_names_list = url_features.get_features_names()
 
     data = {}
-    for i in range(len(urlFeauturesList)):
+    for i in range(len(url_features_list)):
         # this needs to be a element in a list
-        data[urlFeauturesNamesList[i]] = [[urlFeauturesList[i]]]
+        data[url_features_names_list[i]] = [[url_features_list[i]]]
 
     json = {"inputs": data}
 
@@ -91,7 +91,7 @@ def send_API_request(url):
     jsonOutput = response.json()
     #print('Server JSON response: ' + str(jsonOutput))
     output = jsonOutput['outputs'][0][0]
-    print(Fore.GREEN + 'Reponse from the ML model - chances the website is phishing: ' + Fore.RED +
+    print(Fore.GREEN + 'Response from the ML model - chances the website is phishing: ' + Fore.RED +
           str(output) + Style.RESET_ALL)
     print('--------------------------------------------------------------------------------')
     return output
