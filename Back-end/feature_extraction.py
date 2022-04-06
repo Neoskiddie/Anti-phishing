@@ -2,6 +2,7 @@
 # Helper libraries
 import pandas as pd
 import re
+import csv
 
 # libraries for parsing the URLs
 from urllib.parse import urlparse
@@ -10,10 +11,11 @@ from urllib.parse import urlparse
 # https://github.com/shreyagopal/Phishing-Website-Detection-by-Machine-Learning-Techniques/blob/master/URL%20Feature%20Extraction.ipynb
 
 
-class UrlFeautures():
+class UrlFeatures():
+
 
     def __init__(self, url: str):
-        self.set_feautures_list(url)
+        self.set_features_list(url)
 
     def has_ip(self, url):
         '''
@@ -127,11 +129,11 @@ class UrlFeautures():
         parsedUrl = urlparse(url)
         return len(parsedUrl.scheme) + len(parsedUrl.netloc) + len(parsedUrl.path)
 
-    def get_feautures_list(self):
-        return self.feautures
+    def get_features_list(self):
+        return self.features
 
-    def set_feautures_list(self, url):
-        self.feautures = [
+    def set_features_list(self, url):
+        self.features = [
             self.has_ip(url),
             self.is_url_short(url),
             self.get_dots_in_hostname(url),
@@ -144,7 +146,7 @@ class UrlFeautures():
             self.get_base_url_length(url),
         ]
 
-    def get_feautures_names(self):
+    def get_features_names(self):
         """Get names of all the methods in the class as a list.
         This will be used as column names in the Dataframe.
         Doesn't seem to be better way than to call __name__ on each method.
@@ -164,79 +166,49 @@ class UrlFeautures():
         ]
 
 
-class UrlFeaturesWithLabel(UrlFeautures):
+class UrlFeaturesWithLabel(UrlFeatures):
     def __init__(self, url: str, label: int):
-        #self.feautures = self.get_feautures_list(url)
-        self.set_feautures_list(url, label)
+        #self.features = self.get_features_list(url)
+        self.set_features_list(url, label)
 
-    def set_feautures_list(self, url, label):
-        """Setting the feautures, same as base class
+    def set_features_list(self, url, label):
+        """Setting the features, same as base class
         and adding the label."""
-        super().set_feautures_list(url)
-        self.feautures.append(label)
+        super().set_features_list(url)
+        self.features.append(label)
 
-    def get_feautures_names(self):
-        """Overriding feauture names and adding the label for clasificaiton"""
-        feauture_names = super().get_feautures_names()
-        feauture_names.append('is_phishing')
-        print(feauture_names)
-        return feauture_names
+    def get_features_names(self):
+        """Overriding feature names and adding the label for classification"""
+        feature_names = super().get_features_names()
+        feature_names.append('is_phishing')
+        print(feature_names)
+        return feature_names
 
-
-class DataSet:
+def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples=None):
+    """
+    Extract features from a csv file and create pandas Data Frame.
+    file_path - path to the csv file with a list of URLs only
+    is_phishing - a flag used to mark whether the URL dataset contains phishing or not
+    1 means phishing
+    """
     RANDOM_STATE = 12
+    features = []
+# encoding because of "UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 7380: character maps to <undefined>"
+    with open(file_path, 'r', encoding = 'cp850') as csvfile: 
+        datareader = csv.reader(csvfile)
+        for row in datareader:
+            # in the CSV file first item in first row should be the URL, thus the row[0]
+            featureExtraction = UrlFeaturesWithLabel(row[0], is_phishing) 
+            features.append(featureExtraction.features)
 
-    def __init__(self, legitimate_URLs: pd.DataFrame, phishing_URLs: pd.DataFrame, numberOfSamples: int):
-        self.legitURLs = legitimate_URLs
-        self.phishingURLs = phishing_URLs
-        self.numberOfSamples = numberOfSamples
-        self.data = self.createDataSet()
+    data = pd.DataFrame(features, columns=featureExtraction.get_features_names())
+    return data.sample(n=number_of_samples,random_state=RANDOM_STATE).copy()
 
-    def createPhishingDataFrame(self):
-        phishingFeatures = []
-        is_phishing = 1
-
-        phishurl = self.phishingURLs.sample(
-            n=self.numberOfSamples, random_state=self.RANDOM_STATE).copy()
-        phishurl = phishurl.reset_index(drop=True)
-
-        for i in range(0, self.numberOfSamples):
-            url = phishurl['url'][i]
-            feautureExtraction = UrlFeaturesWithLabel(url, is_phishing)
-            phishingFeatures.append(feautureExtraction.feautures)
-
-        return pd.DataFrame(phishingFeatures, columns=feautureExtraction.get_feautures_names())
-
-    def createLegitimateDataFrame(self):
-        legi_features = []
-        is_phishing = 0
-
-        # the data is asumed to have first column as 'url'
-        self.legitURLs.columns = ['url']
-        legiurl = self.legitURLs.sample(
-            n=self.numberOfSamples, random_state=self.RANDOM_STATE).copy()
-        legiurl = legiurl.reset_index(drop=True)
-
-        for i in range(0, self.numberOfSamples):
-            url = legiurl['url'][i]
-            feautureExtraction = UrlFeaturesWithLabel(url, is_phishing)
-            legi_features.append(feautureExtraction.feautures)
-
-        return pd.DataFrame(legi_features, columns=feautureExtraction.get_feautures_names())
-
-    def createDataSet(self):
-        # concat both of the sets
-        legitimate = self.createLegitimateDataFrame()
-        phishing = self.createPhishingDataFrame()
-        return pd.concat([legitimate, phishing]).reset_index(drop=True)
-
-
-# initialising it for colab to be avilable outside of this code block
-urldata = pd.DataFrame()
 if (__name__ == '__main__'):
-    # settings to display all columns, used for debuging
+    RANDOM_STATE = 12
+    # settings to display all columns, used for debugging
     pd.set_option("display.max_columns", None)
-    legitURLs = pd.read_csv("/tmp/legitUrls.csv")
-    phishingURLs = pd.read_csv("/tmp/phishingUrls.csv")
-    dataSet = DataSet(legitURLs, phishingURLs, 5000)
-    urldata = dataSet.data
+    legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0,5000)
+    phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1,5000)
+    dataset = pd.concat([legitURLs, phishingURLs]).sample(frac=1,random_state=1).reset_index(drop=True) # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
+    dataset.to_csv('./Data/dataset.csv')
