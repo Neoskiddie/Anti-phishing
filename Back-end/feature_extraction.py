@@ -193,7 +193,7 @@ def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples
     """
     RANDOM_STATE = 12
     features = []
-# encoding because of "UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 7380: character maps to <undefined>"
+    # encoding because of "UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 7380: character maps to <undefined>"
     with open(file_path, 'r', encoding = 'cp850') as csvfile: 
         datareader = csv.reader(csvfile)
         for row in datareader:
@@ -202,13 +202,17 @@ def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples
             features.append(featureExtraction.features)
 
     data = pd.DataFrame(features, columns=featureExtraction.get_features_names())
+    if (number_of_samples is None) :
+        return data.sample(frac=1, random_state=RANDOM_STATE).copy()
     return data.sample(n=number_of_samples,random_state=RANDOM_STATE).copy()
 
 if (__name__ == '__main__'):
     RANDOM_STATE = 12
     # settings to display all columns, used for debugging
     pd.set_option("display.max_columns", None)
-    legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0,5000)
-    phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1,5000)
-    dataset = pd.concat([legitURLs, phishingURLs]).sample(frac=1,random_state=1).reset_index(drop=True) # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
-    dataset.to_csv('./Data/dataset.csv')
+    legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0)
+    phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1)
+    #legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0,5000)
+    #phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1,5000)
+    dataset = pd.concat([legitURLs, phishingURLs]).sample(frac=1,random_state=RANDOM_STATE).reset_index(drop=True) # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
+    dataset.to_csv('./Data/dataset.csv',index=False)
