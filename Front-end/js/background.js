@@ -1,5 +1,5 @@
-//const ENV =  "PROD"//"DEV" 
-const ENV =  "DEV" 
+const ENV =  "PROD"
+//const ENV =  "DEV" 
 var is_enabled = true // this variable is responsible for keeping whether the URLs are checked for phishing, corresponds to "enabled" storage variable
 var whitelist = []// also local variable corresponding to storage "whitelist" with list of whitelisted websites.
 
@@ -19,7 +19,7 @@ function IsURLMalicious(URL) {
     if (ENV === "DEV"){
         serverUrl = "http://127.0.0.1:8080/check" 
     } else {
-        serverUrl = "http://gbronka.com:8080/check"
+        serverUrl = "https://gbronka.com:2096/check"
     }
     const encodedUrl = encodeURIComponent(URL);
     try {
