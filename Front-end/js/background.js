@@ -10,10 +10,10 @@ const opt_extraInfoSpec = ["blocking"];
 
 /**
  * Check if URL is malicious by calling the backend server API
- * The method returns false whenever error hapens to avoid
- * blocking browsign experience. 
+ * The method returns false whenever error happens to avoid
+ * blocking browsing experience. 
  */
-function IsURLMalicious(URL) {
+function is_url_malicious(URL) {
     // backend has a hardcoded response for http://notreal.test to be a malicious website
     let serverUrl = ""
     if (ENV === "DEV"){
@@ -23,9 +23,26 @@ function IsURLMalicious(URL) {
     }
     const encodedUrl = encodeURIComponent(URL);
     try {
-        //var rawResponse = httpGet(serverUrl + encodedUrl)
         var rawResponse = httpPost(serverUrl, encodedUrl)
     } catch (err) {
+        handle_unavailable_backend()
+        console.log("Error in connection to backend: " + err);
+        return false;
+    }
+
+    if (rawResponse.status === 200) {
+        console.log(rawResponse.responseText)
+        const response = JSON.parse(rawResponse.responseText);
+        // convert string from the json response to boolean
+        return response.answer === 'true';
+    } else {
+        handle_unavailable_backend();
+        console.log("Error in connection to backend: ", rawResponse.statusText);
+        return false;
+    }
+}
+
+function handle_unavailable_backend() {
         let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
         if (confirmAction) {
             const enabled = false
@@ -34,18 +51,6 @@ function IsURLMalicious(URL) {
         } else {
           alert("Action canceled");
         }
-        console.log(err);
-        return false;
-    }
-    if (rawResponse.status === 200) {
-        console.log(rawResponse.responseText)
-        const response = JSON.parse(rawResponse.responseText);
-        // convert string from the json response to boolean
-        return response.answer === 'true';
-    } else {
-        console.log("Error", rawResponse.statusText);
-        return false;
-    }
 }
 
 /** 
@@ -71,32 +76,34 @@ function httpPost(server, urlCheck) {
 }
 
 /**
- * Function called befor a request is made by the browser
- * Calls the IsURLMalicious and depending on resonse
+ * Function called before a request is made by the browser
+ * Calls the is_url_malicious and depending on response
  * redirects to the warning page.
  */
-const callback = function (requestDetails) {
-    const url = requestDetails.url;
-    const hostname = new URL(url).hostname;
-
-    let isHostnameWhitelisted = false;
-
-
-    if (Array.isArray(whitelist) && whitelist.find(domain => hostname.includes(domain))) {
-        isHostnameWhitelisted = true;
-    }
+const callback = function (request_details) {
     console.log('isEnabled is: ' + is_enabled)
-    console.log('is hostname whitelisted: ' + isHostnameWhitelisted)
+    if (!is_enabled) {
+        return;
+    }
+    const url = request_details.url;
+    const hostname = new URL(url).hostname;
+    let is_hostname_whitelisted = false;
 
-    if (!is_enabled || isHostnameWhitelisted) {
+    // check global variable with the list of whitelisted domains
+    if (Array.isArray(whitelist) && whitelist.find(domain => hostname.includes(domain))) {
+        is_hostname_whitelisted = true;
+    }
+    console.log('is hostname whitelisted: ' + is_hostname_whitelisted)
+
+    if (is_hostname_whitelisted) {
         return;
     }
 
-    const isMalicious = IsURLMalicious(url);
-    if (isMalicious) {
-        let warningUrl = chrome.extension.getURL("../html/warning.html")
-        warningUrl = warningUrl + "?originalurl=" + url
-        return { redirectUrl: warningUrl }
+    const is_malicious = is_url_malicious(url);
+    if (is_malicious) {
+        let warning_url = chrome.extension.getURL("../html/warning.html")
+        warning_url = warning_url + "?originalurl=" + url
+        return { redirectUrl: warning_url }
     }
 }
 
@@ -134,5 +141,5 @@ chrome.storage.onChanged.addListener(function (changes) {
 
 // callback and filter must be specified
 // If the optional opt_extraInfoSpec array contains the string 'blocking', the callback function is handled synchronously.
-// In case of anti-phishing extension this is desired bahaviour to process this synchronously.
+// In case of anti-phishing extension this is desired behaviour to process this synchronously.
 chrome.webRequest.onBeforeRequest.addListener(callback, filter, opt_extraInfoSpec);
