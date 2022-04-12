@@ -45,8 +45,8 @@ function is_url_malicious(URL) {
 function handle_unavailable_backend() {
         let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
         if (confirmAction) {
-            const enabled = false
-            chrome.storage.local.set({ enabled });
+            chrome.storage.local.set({ enabled: false });
+            is_enabled = false;
             alert("Extension disabled. You can enable it again in the extension settings.");
         } else {
           alert("Action canceled");
