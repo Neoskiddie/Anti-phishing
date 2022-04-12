@@ -20,7 +20,7 @@ class UrlFeatures():
     def has_ip(self, url):
         '''
         Code from https://gist.github.com/dfee/6ed3a4b05cfe7a6faf40a2102408d5d8
-        slightly modified to detect IPv4 on it's own. Because it's enough to detect IPv4 on it's own, the embeded cases were deleted, as they are detected anyway.
+        slightly modified to detect IPv4 on it's own. Because it's enough to detect IPv4 on it's own, the embedded cases were deleted, as they are detected anyway.
         https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
         '''
         IPV4SEG = r'(?:25[0-5]|(?:2[0-4]|1{0,1}[0-9]){0,1}[0-9])'
