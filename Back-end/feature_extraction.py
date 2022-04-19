@@ -3,6 +3,7 @@
 import pandas as pd
 import re
 import csv
+import numpy as np
 
 # libraries for parsing the URLs
 from urllib.parse import urlparse
@@ -12,7 +13,7 @@ from urllib.parse import urlparse
 
 
 class UrlFeatures():
-
+    features = []
 
     def __init__(self, url: str):
         self.set_features_list(url)
@@ -151,7 +152,7 @@ class UrlFeatures():
         This will be used as column names in the Dataframe.
         Doesn't seem to be better way than to call __name__ on each method.
         The best would be to somehow automatically call this on all methods in the class.
-        But I don't know how to do it without overcomplicaitng things."""
+        But I don't know how to do it without overcomplicating things."""
         return [
             self.has_ip.__name__,
             self.is_url_short.__name__,
@@ -181,8 +182,9 @@ class UrlFeaturesWithLabel(UrlFeatures):
         """Overriding feature names and adding the label for classification"""
         feature_names = super().get_features_names()
         feature_names.append('is_phishing')
-        print(feature_names)
+        #print(feature_names)
         return feature_names
+
 
 def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples=None):
     """
@@ -206,13 +208,32 @@ def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples
         return data.sample(frac=1, random_state=RANDOM_STATE).copy()
     return data.sample(n=number_of_samples,random_state=RANDOM_STATE).copy()
 
+# Split the dataset into a training and a testing dataset.
+def split_dataset(dataset, random_seed, test_ratio=0.20):
+  """Splits a panda dataframe in two."""
+  np.random.seed(random_seed)
+  test_indices = np.random.rand(len(dataset)) < test_ratio
+  return dataset[~test_indices], dataset[test_indices]
+
 if (__name__ == '__main__'):
     RANDOM_STATE = 12
     # settings to display all columns, used for debugging
-    pd.set_option("display.max_columns", None)
+    #pd.set_option('display.max_columns', None)
     legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0)
-    phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1)
+    phishingURLs = extract_features_from_csv('./Data/merged.csv', 1)
+    print('Number of legitimate URLs: {}'.format(len(legitURLs)))
+    print('Number of phishing URLs: {}'.format(len(phishingURLs)))
     #legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0,5000)
     #phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1,5000)
     dataset = pd.concat([legitURLs, phishingURLs]).sample(frac=1,random_state=RANDOM_STATE).reset_index(drop=True) # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
-    dataset.to_csv('./Data/dataset.csv',index=False)
+    print('Total number of URLs: {}'.format(len(dataset)))
+    train_ds_pd, test_ds_pd = split_dataset(dataset, RANDOM_STATE)
+
+    print('{} URLs for training, {} URLs for testing.'.format(len(train_ds_pd), len(test_ds_pd)))
+    train_ds_pd.to_csv('./Data/training_dataset.csv',index=False)
+    test_ds_pd.to_csv('./Data/testing_dataset.csv',index=False)
+
+#Number of legitimate URLs: 35378
+#Number of phishing URLs: 19478
+#Total number of URLs: 54856
+#43941 URLs for training, 10915 URLs for testing.
