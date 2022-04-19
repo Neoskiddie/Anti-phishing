@@ -1,8 +1,8 @@
 import unittest
-from feauture_extraction import *
+from feature_extraction import *
 
 
-class TestFeautureExtraction(unittest.TestCase):
+class TestFeatureExtraction(unittest.TestCase):
     URL = "https://stackoverflow.com"
     EXAMPLE_URLS = [
         'https://attraction.example.com/books.php',
@@ -17,7 +17,7 @@ class TestFeautureExtraction(unittest.TestCase):
         'https://example.com/books.aspx',
     ]
 
-    feautureExtraction = UrlFeautures(URL)
+    featureExtraction = UrlFeatures(URL)
 
     def test_has_ip(self):
         ipList = ['1::',
@@ -65,17 +65,17 @@ class TestFeautureExtraction(unittest.TestCase):
                   ]
 
         for ip in ipList:
-            self.assertEqual(self.feautureExtraction.has_ip(ip), 1)
+            self.assertEqual(self.featureExtraction.has_ip(ip), 1)
         for url in self.EXAMPLE_URLS:
-            self.assertEqual(self.feautureExtraction.has_ip(url), 0)
+            self.assertEqual(self.featureExtraction.has_ip(url), 0)
 
-        self.assertEqual(self.feautureExtraction.has_ip(
+        self.assertEqual(self.featureExtraction.has_ip(
             'https://stackoverflow.com'), 0)
-        self.assertEqual(self.feautureExtraction.has_ip(
+        self.assertEqual(self.featureExtraction.has_ip(
             'http://1563:6ae1:4cab:a557:0d6d:af67:6b44:2be1/2/paypal.ca/index.html'), 1)
-        self.assertEqual(self.feautureExtraction.has_ip(
+        self.assertEqual(self.featureExtraction.has_ip(
             '1563:6ae1:4cab:a557:0d6d:af67:6b44:2be1'), 1)
-        self.assertEqual(self.feautureExtraction.has_ip(
+        self.assertEqual(self.featureExtraction.has_ip(
             'http://125.98.3.123/fake.html'), 1)
 
     def test_is_url_short(self):
@@ -87,57 +87,57 @@ class TestFeautureExtraction(unittest.TestCase):
             'shorturl.at/uxMQ6',
         ]
         for url in shortUrls:
-            self.assertEqual(self.feautureExtraction.is_url_short(url), 1)
+            self.assertEqual(self.featureExtraction.is_url_short(url), 1)
 
         for example_url in self.EXAMPLE_URLS:
             self.assertEqual(
-                self.feautureExtraction.is_url_short(example_url), 0)
+                self.featureExtraction.is_url_short(example_url), 0)
 
-    def test_getDotsInHostname(self):
+    def test_get_dots_in_hostname(self):
         self.assertEqual(
-            self.feautureExtraction.get_dots_in_hostname(self.URL), 1)
+            self.featureExtraction.get_dots_in_hostname(self.URL), 1)
 
-    def test_hasAtSign(self):
+    def test_has_at_sign(self):
         URL_WITH_AT_SIGN = 'http://www.legitimate.com@http://www.phishing.com'
         self.assertEqual(
-            self.feautureExtraction.has_at_sign(URL_WITH_AT_SIGN), 1)
-        self.assertEqual(self.feautureExtraction.has_at_sign(self.URL), 0)
+            self.featureExtraction.has_at_sign(URL_WITH_AT_SIGN), 1)
+        self.assertEqual(self.featureExtraction.has_at_sign(self.URL), 0)
 
     def test_has_double_slash(self):
         URL_WITH_AT_REDIRECT = 'http://www.legitimate.com//http://www.phishing.com'
         self.assertEqual(
-            self.feautureExtraction.has_double_slash(URL_WITH_AT_REDIRECT), 1)
-        self.assertEqual(self.feautureExtraction.has_double_slash(self.URL), 0)
+            self.featureExtraction.has_double_slash(URL_WITH_AT_REDIRECT), 1)
+        self.assertEqual(self.featureExtraction.has_double_slash(self.URL), 0)
 
     def test_has_hyphen_domain(self):
         self.assertEqual(
-            self.feautureExtraction.has_hyphen_domain(self.URL), 0)
-        self.assertEqual(self.feautureExtraction.has_hyphen_domain(
+            self.featureExtraction.has_hyphen_domain(self.URL), 0)
+        self.assertEqual(self.featureExtraction.has_hyphen_domain(
             "http://www.confirme-paypal.com/."), 1)
-        self.assertEqual(self.feautureExtraction.has_hyphen_domain(
+        self.assertEqual(self.featureExtraction.has_hyphen_domain(
             "http://www.example.com/some-test-path/just-trying."), 0)
 
-    def test_hasHttps(self):
-        self.assertEqual(self.feautureExtraction.has_https(self.URL), 1)
+    def test_has_https(self):
+        self.assertEqual(self.featureExtraction.has_https(self.URL), 1)
 
-    def test_getHostLength(self):
-        self.assertEqual(self.feautureExtraction.get_host_length(self.URL), 17)
+    def test_get_host_length(self):
+        self.assertEqual(self.featureExtraction.get_host_length(self.URL), 17)
 
-    def test_hasHyphenOrUnderscore(self):
+    def test_has_hyphen_or_underscore(self):
         self.assertEqual(
-            self.feautureExtraction.has_hyphen_or_underscore(self.URL), 0)
+            self.featureExtraction.has_hyphen_or_underscore(self.URL), 0)
 
-    def test_getBaseUrlLength(self):
+    def test_get_base_url_length(self):
         self.assertEqual(
-            self.feautureExtraction.get_base_url_length(self.URL), 22)
+            self.featureExtraction.get_base_url_length(self.URL), 22)
 
 #    def test_feautureExtraction(self):
-#        self.assertEqual(self.feautureExtraction.feautures,
+#        self.assertEqual(self.featureExtraction.feautures,
 #                         [1, 0, 1, 17, 0, 22])
 #
 #    def test_feautureExtractionWithLabel(self):
-#        self.feautureExtraction = UrlFeaturesWithLabel(self.URL, 1)
-#        self.assertEqual(self.feautureExtraction.feautures,
+#        self.featureExtraction = UrlFeaturesWithLabel(self.URL, 1)
+#        self.assertEqual(self.featureExtraction.feautures,
 #                         [1, 0, 1, 17, 0, 22, 1])
 
 
