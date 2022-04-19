@@ -72,3 +72,7 @@ this should run only on local port:
 
 asuming the directory structure for the "phishingModel" is:
 `/models/phishingModel/1/<theActualModel>`
+
+
+## whois
+had some problem on windows with it. Whois must be installed. Downloaded the one from Microsoft page and added it to path.
