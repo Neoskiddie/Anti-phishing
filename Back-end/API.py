@@ -11,7 +11,7 @@ from colorama import Fore, Style  # fancy colours in terminal
 
 MODEL_HOST = 'http://127.0.0.1' 
 PORT = '8501'
-MODEL_NAME = 'phishingModelAllUrlFeautures' 
+MODEL_NAME = 'phishingModelAllUrlFeatures_v3' 
 API_ENDPOINT = MODEL_HOST + ':' + PORT + \
     '/v1/models/' + MODEL_NAME + ':predict'
 MAX_ML_OUTPUT = 0.95
@@ -38,7 +38,6 @@ class Check(Resource):
 
         encodedUrl = args['url']
         url = urllib.parse.unquote(encodedUrl)
-        print("url is: " + url)
 
         # The front-end will block site if response is "true"
         answer = "false"
