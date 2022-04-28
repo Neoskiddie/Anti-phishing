@@ -1,3 +1,6 @@
+"""
+Not used in final project. Whois features extraction. Very slow.
+"""
 import whois
 import traceback
 import datetime

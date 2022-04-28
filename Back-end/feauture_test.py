@@ -1,3 +1,6 @@
+"""
+Class used to unit test each of the feature extraction functions.
+"""
 import unittest
 from feature_extraction import *
 
@@ -131,13 +134,13 @@ class TestFeatureExtraction(unittest.TestCase):
         self.assertEqual(
             self.featureExtraction.get_base_url_length(self.URL), 22)
 
-#    def test_feautureExtraction(self):
-#        self.assertEqual(self.featureExtraction.feautures,
+#    def test_featureExtraction(self):
+#        self.assertEqual(self.featureExtraction.features,
 #                         [1, 0, 1, 17, 0, 22])
 #
-#    def test_feautureExtractionWithLabel(self):
+#    def test_featureExtractionWithLabel(self):
 #        self.featureExtraction = UrlFeaturesWithLabel(self.URL, 1)
-#        self.assertEqual(self.featureExtraction.feautures,
+#        self.assertEqual(self.featureExtraction.features,
 #                         [1, 0, 1, 17, 0, 22, 1])
 
 

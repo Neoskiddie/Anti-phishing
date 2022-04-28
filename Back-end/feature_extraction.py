@@ -1,4 +1,8 @@
-
+"""
+This file contains the feature extraction class that is used by the API to process
+each request and to create the dataset. If this file is run on its own, it creates
+the training_dataset.csv and testing_dataset.csv from  Benign_list_big_final.csv and merged.csv
+"""
 # Helper libraries
 import pandas as pd
 import re

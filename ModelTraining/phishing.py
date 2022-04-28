@@ -31,26 +31,19 @@ print('TensorFlow version: {}'.format(tf.__version__))
 from google.colab import drive
 drive.mount('/content/gdrive')
 
-DATASET_DIR = "/content/gdrive/MyDrive/DATA/dataset.csv"
-
-DATASET = pd.read_csv(DATASET_DIR)
+TRAINING_FILE = "/content/gdrive/MyDrive/DATA/training_dataset.csv"
+TESTING_FILE = "/content/gdrive/MyDrive/DATA/testing_dataset.csv"
+TRAINING_DATASET = pd.read_csv(TRAINING_FILE)
+TESTING_DATASET = pd.read_csv(TESTING_FILE)
+#print('Number of records in training dataset: {}'.format(TRAINING_DATASET.count()))
+TRAINING_DATASET.info()
 # Display the first 3 examples.
-DATASET.head(3)
-
-# Split the dataset into a training and a testing dataset.
-def split_dataset(dataset, test_ratio=0.20):
-  """Splits a panda dataframe in two."""
-  test_indices = np.random.rand(len(dataset)) < test_ratio
-  return dataset[~test_indices], dataset[test_indices]
-
-train_ds_pd, test_ds_pd = split_dataset(DATASET)
-print("{} examples in training, {} examples for testing.".format(
-    len(train_ds_pd), len(test_ds_pd)))
+TRAINING_DATASET.head(5)
 
 """Convert pandas dataframe into tensorflow dataset"""
 
-train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(train_ds_pd, label="is_phishing")
-test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(test_ds_pd, label="is_phishing")
+train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(TRAINING_DATASET, label="is_phishing")
+test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(TESTING_DATASET, label="is_phishing")
 
 """Train the model
 Note:
@@ -58,29 +51,15 @@ No input features are specified. Therefore, all the columns will be used as inpu
 """
 
 # Specify the model.
-model = tfdf.keras.RandomForestModel()
+model = tfdf.keras.RandomForestModel(compute_oob_variable_importances=True)
 
 # Optionally, add evaluation metrics.
-model.compile(
-    metrics=["accuracy"])
+model.compile(metrics=["accuracy"])
 
 # Train the model.
 # "sys_pipes" is optional. It enables the display of the training logs. It doesn't work for some reason.
 #with sys_pipes():
 model.fit(x=train_ds)
-
-evaluation = model.evaluate(test_ds, return_dict=True)
-print()
-
-for name, value in evaluation.items():
-  print(f"{name}: {value:.4f}")
-
-#model.summary()
-#model.make_inspector().variable_importances()
-#model.make_inspector().evaluation()
-model.make_inspector().features()
-
-tfdf.model_plotter.plot_model_in_colab(model, tree_idx=0, max_depth=3)
 
 """Default TF-serving produces error. Finally found why that's happening. The explanation:
 >TensorFlow Serving is a serving system for TensorFlow models in production environments. The TF-Serving team publishes a pre-compiled release containing only Core TensorFlow ops.
@@ -90,7 +69,7 @@ tfdf.model_plotter.plot_model_in_colab(model, tree_idx=0, max_depth=3)
 https://github.com/tensorflow/decision-forests/blob/main/documentation/tensorflow_serving.md
 """
 
-MODEL_DIR = "/content/gdrive/MyDrive/phishingModelAllUrlFeatures_v2"
+MODEL_DIR = "/content/gdrive/MyDrive/phishingModelAllUrlFeatures_v4"
 # model_1.save("/content/gdrive/MyDrive/firstModelSave")
 # Fetch the Keras session and save the model
 # The signature definition is defined by the input and output tensors,
@@ -113,3 +92,98 @@ tf.keras.models.save_model(
 
 print('\nSaved model:')
 !ls -l {export_path}
+
+evaluation = model.evaluate(test_ds, return_dict=True)
+print()
+
+for name, value in evaluation.items():
+  print(f"{name}: {value:.4f}")
+
+model.summary()
+
+tfdf.model_plotter.plot_model_in_colab(model, tree_idx=0, max_depth=3) # this values seems to be default - calling just with `(model)` has same result
+
+import matplotlib.pyplot as plt
+
+logs = model.make_inspector().training_logs()
+
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1, 2, 1)
+plt.plot([log.num_trees for log in logs], [log.evaluation.accuracy for log in logs])
+plt.xlabel("Number of trees")
+plt.ylabel("Accuracy (out-of-bag)")
+
+plt.subplot(1, 2, 2)
+plt.plot([log.num_trees for log in logs], [log.evaluation.loss for log in logs])
+plt.xlabel("Number of trees")
+plt.ylabel("Logloss (out-of-bag)")
+
+#plt.show()
+#plt.savefig("/content/gdrive/MyDrive/matplotAccuracyLogloss2.png")
+plt.savefig("/content/gdrive/MyDrive/matplotAccuracyLogloss2.svg", format="svg")
+
+inspector = model.make_inspector()
+print("Model type:", inspector.model_type())
+print("Number of trees:", inspector.num_trees())
+print("Objective:", inspector.objective())
+print("Input features:", inspector.features())
+
+# The feature importances
+inspector.variable_importances()
+
+inspector.variable_importances()['MEAN_DECREASE_IN_ACCURACY']
+
+# number_of_use[F] will be the number of node using feature F in its condition.
+import collections
+number_of_use = collections.defaultdict(lambda: 0)
+
+# Iterate over all the nodes in a Depth First Pre-order traversals.
+for node_iter in inspector.iterate_on_nodes():
+
+  if not isinstance(node_iter.node, tfdf.py_tree.node.NonLeafNode):
+    # Skip the leaf nodes
+    continue
+
+  # Iterate over all the features used in the condition.
+  # By default, models are "oblique" i.e. each node tests a single feature.
+  for feature in node_iter.node.condition.features():
+    number_of_use[feature] += 1
+
+print("Number of condition nodes per features:")
+for feature, count in number_of_use.items():
+  print("\t", feature.name, ":", count)
+
+# Commented out IPython magic to ensure Python compatibility.
+# This cell start TensorBoard that can be slow.
+# Load the TensorBoard notebook extension
+# %load_ext tensorboard
+# Google internal version
+# %load_ext google3.learning.brain.tensorboard.notebook.extension
+
+# Clear existing results (if any)
+!rm -fr "/tmp/tensorboard_logs"
+
+# Export the meta-data to tensorboard.
+inspector.export_to_tensorboard("/tmp/tensorboard_logs")
+
+# Retraining the model with the metrics such as true positives
+model_false_positive = tfdf.keras.RandomForestModel()
+
+# Optionally, add evaluation metrics.
+model_false_positive.compile(metrics=[tf.keras.metrics.BinaryAccuracy(),
+                         tf.keras.metrics.TruePositives(),
+                         tf.keras.metrics.TrueNegatives(),
+                         tf.keras.metrics.FalsePositives(),
+                         tf.keras.metrics.FalseNegatives()])
+
+# Train the model.
+# "sys_pipes" is optional. It enables the display of the training logs. It doesn't work for some reason.
+#with sys_pipes():
+model_false_positive.fit(x=train_ds)
+
+evaluation = model_false_positive.evaluate(test_ds, return_dict=True)
+print()
+
+for name, value in evaluation.items():
+  print(f"{name}: {value:.4f}")

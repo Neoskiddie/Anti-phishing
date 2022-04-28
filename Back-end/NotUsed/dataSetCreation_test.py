@@ -1,3 +1,6 @@
+"""
+Unfinished class used to test URL processing.
+"""
 import pandas as pd
 import pandas.testing as pd_testing
 import numpy as np
@@ -31,10 +34,10 @@ class TestFeautureExtraction(unittest.TestCase):
             self.legitURLs, self.phishingURLs, NUMBER_OF_SAMPLES)
 
     def test_legitURLs(self):
+        # TODO: It's BROKEN, fix it
         # not sure why but when creating np array it's using int32, while the one
         # from the DataFrame is int64, so need to specify that here
         # This test compares output of the feautre extractiona against an array of hardcoded values.
-        # TODO: It's BROKEN, fix it
         # self.has_ip(url),
         # self.is_url_short(url),
         # self.getDotsInHostname(url),

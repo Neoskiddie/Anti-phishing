@@ -1,5 +1,8 @@
-# https://towardsdatascience.com/the-right-way-to-build-an-api-with-python-cd08ab285f8f
-# pip install flask flask-restful
+"""
+One of the three main parts of the project. The API "Tanslating" raw URLs into data understood by the machine learning model.
+Based on: https://towardsdatascience.com/the-right-way-to-build-an-api-with-python-cd08ab285f8f
+In general as per Flask documentation it shouldn't be used in production.
+"""
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
 import requests
