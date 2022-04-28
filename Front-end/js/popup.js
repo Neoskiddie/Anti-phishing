@@ -7,14 +7,14 @@ var checkbox = document.getElementById("myonoffswitch");
  * Same as right clicking extension icon and selecting options. 
  */
 function openOps() {
-    chrome.runtime.openOptionsPage()
+  chrome.runtime.openOptionsPage()
 };
 
 /**
  * Open about page in new tab. 
  */
 function openAbout() {
-    chrome.tabs.create({ url: 'https://gbronka.com/honours' });
+  chrome.tabs.create({ url: 'https://gbronka.com/honours' });
 };
 
 /**

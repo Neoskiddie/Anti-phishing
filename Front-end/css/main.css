@@ -21,7 +21,7 @@ h3 {
 
 textarea {
     display: block;
-    margin:auto;
+    margin: auto;
 }
 
 button {
@@ -34,7 +34,7 @@ button {
 }
 
 .center {
-    text-align:center
+    text-align: center
 }
 
 #infoBox {
@@ -44,6 +44,7 @@ button {
     margin-top: 40px;
     margin-bottom: 40px;
 }
+
 #visitButton {
     float: right;
 }
@@ -51,6 +52,7 @@ button {
 #save {
     margin: auto;
 }
+
 /* switch */
 /*-------------------------------------------------------------------------------- */
 .onoffswitch {
@@ -147,6 +149,7 @@ button {
     line-height: 43px;
     font-family: 'Oswald', Helvetica;
 }
+
 .popup_button {
     width: 120px;
     margin: 30px;

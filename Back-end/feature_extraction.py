@@ -186,11 +186,11 @@ class UrlFeaturesWithLabel(UrlFeatures):
         """Overriding feature names and adding the label for classification"""
         feature_names = super().get_features_names()
         feature_names.append('is_phishing')
-        #print(feature_names)
+        # print(feature_names)
         return feature_names
 
 
-def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples=None):
+def extract_features_from_csv(file_path: str, is_phishing: int, number_of_samples=None):
     """
     Extract features from a csv file and create pandas Data Frame.
     file_path - path to the csv file with a list of URLs only
@@ -200,44 +200,52 @@ def extract_features_from_csv(file_path: str, is_phishing: int,number_of_samples
     RANDOM_STATE = 12
     features = []
     # encoding because of "UnicodeDecodeError: 'charmap' codec can't decode byte 0x8d in position 7380: character maps to <undefined>"
-    with open(file_path, 'r', encoding = 'cp850') as csvfile: 
+    with open(file_path, 'r', encoding='cp850') as csvfile:
         datareader = csv.reader(csvfile)
         for row in datareader:
             # in the CSV file first item in first row should be the URL, thus the row[0]
-            featureExtraction = UrlFeaturesWithLabel(row[0], is_phishing) 
+            featureExtraction = UrlFeaturesWithLabel(row[0], is_phishing)
             features.append(featureExtraction.features)
 
-    data = pd.DataFrame(features, columns=featureExtraction.get_features_names())
-    if (number_of_samples is None) :
+    data = pd.DataFrame(
+        features, columns=featureExtraction.get_features_names())
+    if (number_of_samples is None):
         return data.sample(frac=1, random_state=RANDOM_STATE).copy()
-    return data.sample(n=number_of_samples,random_state=RANDOM_STATE).copy()
+    return data.sample(n=number_of_samples, random_state=RANDOM_STATE).copy()
 
 # Split the dataset into a training and a testing dataset.
+
+
 def split_dataset(dataset, random_seed, test_ratio=0.20):
-  """Splits a panda dataframe in two."""
-  np.random.seed(random_seed)
-  test_indices = np.random.rand(len(dataset)) < test_ratio
-  return dataset[~test_indices], dataset[test_indices]
+    """Splits a panda dataframe in two."""
+    np.random.seed(random_seed)
+    test_indices = np.random.rand(len(dataset)) < test_ratio
+    return dataset[~test_indices], dataset[test_indices]
+
 
 if (__name__ == '__main__'):
     RANDOM_STATE = 12
     # settings to display all columns, used for debugging
     #pd.set_option('display.max_columns', None)
-    legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0)
+    legitURLs = extract_features_from_csv(
+        './Data/Benign_list_big_final.csv', 0)
     phishingURLs = extract_features_from_csv('./Data/merged.csv', 1)
     print('Number of legitimate URLs: {}'.format(len(legitURLs)))
     print('Number of phishing URLs: {}'.format(len(phishingURLs)))
     #legitURLs = extract_features_from_csv('./Data/Benign_list_big_final.csv', 0,5000)
     #phishingURLs = extract_features_from_csv('./Data/phishing_dataset.csv', 1,5000)
-    dataset = pd.concat([legitURLs, phishingURLs]).sample(frac=1,random_state=RANDOM_STATE).reset_index(drop=True) # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
+    # Here, specifying drop=True prevents .reset_index from creating a column containing the old index entries.
+    dataset = pd.concat([legitURLs, phishingURLs]).sample(
+        frac=1, random_state=RANDOM_STATE).reset_index(drop=True)
     print('Total number of URLs: {}'.format(len(dataset)))
     train_ds_pd, test_ds_pd = split_dataset(dataset, RANDOM_STATE)
 
-    print('{} URLs for training, {} URLs for testing.'.format(len(train_ds_pd), len(test_ds_pd)))
-    train_ds_pd.to_csv('./Data/training_dataset.csv',index=False)
-    test_ds_pd.to_csv('./Data/testing_dataset.csv',index=False)
+    print('{} URLs for training, {} URLs for testing.'.format(
+        len(train_ds_pd), len(test_ds_pd)))
+    train_ds_pd.to_csv('./Data/training_dataset.csv', index=False)
+    test_ds_pd.to_csv('./Data/testing_dataset.csv', index=False)
 
-#Number of legitimate URLs: 35378
-#Number of phishing URLs: 19478
-#Total number of URLs: 54856
-#43941 URLs for training, 10915 URLs for testing.
+# Number of legitimate URLs: 35378
+# Number of phishing URLs: 19478
+# Total number of URLs: 54856
+# 43941 URLs for training, 10915 URLs for testing.

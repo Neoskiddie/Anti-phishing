@@ -12,9 +12,8 @@ list_of_answers = []
 for line in my_file:
     url_to_check = urllib.parse.quote(line)
     myobj = {'url': url_to_check}
-    x = requests.post(url, json = myobj)
+    x = requests.post(url, json=myobj)
     answer = x.json()['answer']
     list_of_answers.append(answer)
 
 print(list_of_answers)
-

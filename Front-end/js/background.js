@@ -1,4 +1,4 @@
-const ENV =  "PROD"
+const ENV = "PROD"
 //const ENV =  "DEV" 
 var is_enabled = true // this variable is responsible for keeping whether the URLs are checked for phishing, corresponds to "enabled" storage variable
 var whitelist = []// also local variable corresponding to storage "whitelist" with list of whitelisted websites.
@@ -16,8 +16,8 @@ const opt_extraInfoSpec = ["blocking"];
 function is_url_malicious(URL) {
     // backend has a hardcoded response for http://notreal.test to be a malicious website
     let serverUrl = ""
-    if (ENV === "DEV"){
-        serverUrl = "http://127.0.0.1:8080/check" 
+    if (ENV === "DEV") {
+        serverUrl = "http://127.0.0.1:8080/check"
     } else {
         serverUrl = "https://gbronka.com:2096/check"
     }
@@ -43,14 +43,14 @@ function is_url_malicious(URL) {
 }
 
 function handle_unavailable_backend() {
-        let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
-        if (confirmAction) {
-            chrome.storage.local.set({ enabled: false });
-            is_enabled = false;
-            alert("Extension disabled. You can enable it again in the extension settings.");
-        } else {
-          alert("Action canceled");
-        }
+    let confirmAction = confirm("The anti-phishing server is unavailable.\nWould you like to disable the extension?");
+    if (confirmAction) {
+        chrome.storage.local.set({ enabled: false });
+        is_enabled = false;
+        alert("Extension disabled. You can enable it again in the extension settings.");
+    } else {
+        alert("Action canceled");
+    }
 }
 
 /** 
@@ -128,15 +128,15 @@ chrome.runtime.onInstalled.addListener(function () {
  * It logs the values to console and also passes the values to local variables
  */
 chrome.storage.onChanged.addListener(function (changes) {
-  for (let [key, { newValue }] of Object.entries(changes)) {
-    console.log("New value for key " + key + " is: " + newValue);
-    if (key === "enabled"){
+    for (let [key, { newValue }] of Object.entries(changes)) {
+        console.log("New value for key " + key + " is: " + newValue);
+        if (key === "enabled") {
             is_enabled = newValue
-       }
-       if (key === "whitelist") {
-        whitelist = newValue
-       }
-  }
+        }
+        if (key === "whitelist") {
+            whitelist = newValue
+        }
+    }
 });
 
 // callback and filter must be specified

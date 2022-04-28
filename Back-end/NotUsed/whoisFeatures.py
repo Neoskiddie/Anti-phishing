@@ -4,7 +4,8 @@ Not used in final project. Whois features extraction. Very slow.
 import whois
 import traceback
 import datetime
-from dateutil.relativedelta import relativedelta  # needed to easily add one year to today's data
+# needed to easily add one year to today's data
+from dateutil.relativedelta import relativedelta
 import tldextract
 
 
@@ -49,12 +50,11 @@ class WhoisFeatures(UrlFeatures):
             if date <= date_in_one_year:
                 return 1
             return 0
-            #for date in expiration_date:
+            # for date in expiration_date:
             #    #new_date = parser.parse(date)
             #    if date <= date_in_one_year:
             #        return 1
-            #return 0
-
+            # return 0
 
     def is_domain_young(self, domain_record):
         """
@@ -95,7 +95,6 @@ class WhoisFeatures(UrlFeatures):
 #                    return 1
 #            return 0
 
-
     def get_domain_record(self, url: str):
         """
         :param url: url of the website to check
@@ -112,7 +111,6 @@ class WhoisFeatures(UrlFeatures):
             return 0
         else:
             return 1
-
 
     def extract_domain_from_url(self, url: str):
         extracted = tldextract.extract(url)
@@ -136,7 +134,8 @@ class WhoisFeatures(UrlFeatures):
         domain = self.extract_domain_from_url(url)
         domain_record = self.get_domain_record(domain)
         if domain_record is None:
-            self.features.extend([0, 0, 0]) # no record available, maybe set this to None?
+            # no record available, maybe set this to None?
+            self.features.extend([0, 0, 0])
         else:
             self.features.extend([
                 self.has_domain_record(domain_record),

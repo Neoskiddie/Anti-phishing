@@ -12,24 +12,26 @@ import feature_extraction as fe
 from colorama import Fore, Style  # fancy colours in terminal
 
 
-MODEL_HOST = 'http://127.0.0.1' 
+MODEL_HOST = 'http://127.0.0.1'
 PORT = '8501'
-MODEL_NAME = 'phishingModelAllUrlFeatures_v3' 
+MODEL_NAME = 'phishingModelAllUrlFeatures_v3'
 API_ENDPOINT = MODEL_HOST + ':' + PORT + \
     '/v1/models/' + MODEL_NAME + ':predict'
 MAX_ML_OUTPUT = 0.95
 
 # "fake" phishing website used for presentation / testing
-HARDCODED_PHISHING = "notreal.test" 
+HARDCODED_PHISHING = "notreal.test"
 
 app = Flask(__name__)
 api = Api(app)
+
 
 class Check(Resource):
     """
     Flask needs to know that this class is an endpoint for the API
     thus Resource must be passed in with the class definition
     """
+
     def post(self):
         """
         Parse the URL received from frontend
@@ -62,7 +64,6 @@ def is_phishing(url):
     if output >= MAX_ML_OUTPUT:
         return True
     return False
-
 
 
 def send_API_request(url):
@@ -99,4 +100,5 @@ def send_API_request(url):
 api.add_resource(Check, '/check')  # '/check' is entry point of the API
 
 if (__name__ == '__main__'):
-    app.run(host="0.0.0.0", port=2096, ssl_context=('/etc/letsencrypt/live/gbronka.com/cert.pem', '/etc/letsencrypt/live/gbronka.com/privkey.pem'))
+    app.run(host="0.0.0.0", port=2096, ssl_context=(
+        '/etc/letsencrypt/live/gbronka.com/cert.pem', '/etc/letsencrypt/live/gbronka.com/privkey.pem'))
