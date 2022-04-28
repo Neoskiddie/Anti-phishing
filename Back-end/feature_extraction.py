@@ -2,6 +2,11 @@
 This file contains the feature extraction class that is used by the API to process
 each request and to create the dataset. If this file is run on its own, it creates
 the training_dataset.csv and testing_dataset.csv from  Benign_list_big_final.csv and merged.csv
+
+based on:
+https://github.com/Chandni97/PhishDetect/blob/master/extract_feature.py
+https://github.com/ESDAUNG/Phishing-URL-Detection/blob/main/Feature_extraction.java
+https://github.com/shreyagopal/Phishing-Website-Detection-by-Machine-Learning-Techniques/blob/master/URL%20Feature%20Extraction.ipynb
 """
 # Helper libraries
 import pandas as pd
@@ -11,10 +16,6 @@ import numpy as np
 
 # libraries for parsing the URLs
 from urllib.parse import urlparse
-# https://github.com/Chandni97/PhishDetect/blob/master/extract_feature.py
-# https://github.com/ESDAUNG/Phishing-URL-Detection/blob/main/Feature_extraction.java
-# https://github.com/shreyagopal/Phishing-Website-Detection-by-Machine-Learning-Techniques/blob/master/URL%20Feature%20Extraction.ipynb
-
 
 class UrlFeatures():
     features = []
