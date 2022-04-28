@@ -1,2 +1,2 @@
 # Anti-phishing
-Anti-phishing Chrome extension for Honours project
+Anti-phishing Chrome extension for my Honours project
