@@ -7,4 +7,14 @@ The purpose of the project was to create a browser extension that prevents users
 * Back-end - a custom API written in Python converting the URLs into input for the ML model
 * ModelTraining - the ML RandomForest model that was deployed to a Docker continer. It was developed with Tensorflow 2.5.1 and Tensorflow decision forests 0.1.8
 
+### Overview of the archtecture:
 ![Architecture of the system](img/architecture.jpg)
+
+### Example how a blocked page looks like:
+![Example blocked page](img/blocked.jpg)
+
+### Extension settings:
+![Settings](img/options.jpg)
+
+### Settings in a popup:
+![Popup](img/popup.jpg)
